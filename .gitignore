@@ -4,7 +4,7 @@ node_modules/
 # Kubernetes dosyaları
 **/*.tfstate
 **/*.tfstate.*
-**/terraform.tfvars
+**/.terraform.lock.hcl
 **/.terraform/
 **/terraform.tfstate.backup
 
