@@ -17,6 +17,10 @@ spec:
           name: frontend
           ports:
             - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: mongo-configmap
+          imagePullPolicy: Always
       restartPolicy: Always
 
 

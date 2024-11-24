@@ -20,6 +20,9 @@ spec:
           envFrom:
             - secretRef:
                 name: mongo-secret
+            - configMapRef:
+                name: mongo-configmap
+          imagePullPolicy: Always
       restartPolicy: Always
 
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import API_BASE_URL from './config.js';
+
+// API_BASE_URL tanımı: Çevresel değişken yoksa varsayılan URL kullanılır
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://backend-service:5000';
 
 function App() {
   const [contacts, setContacts] = useState([]);
@@ -21,7 +23,7 @@ function App() {
 
   const addContact = (e) => {
     e.preventDefault();
-    axios.post(`${API_BASE_URL}/contacts`, { name, phone }) // Güncel URL kullanılıyor
+    axios.post(`${API_BASE_URL}/contacts`, { name, phone })
       .then((response) => {
         setContacts([...contacts, response.data]);
         setName('');
@@ -38,8 +40,18 @@ function App() {
       <h1>Telefon Defteri</h1>
       {error && <div style={{ color: 'red' }}>{error}</div>}
       <form onSubmit={addContact}>
-        <input type="text" placeholder="Ad" value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="text" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input 
+          type="text" 
+          placeholder="Ad" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+        />
+        <input 
+          type="text" 
+          placeholder="Telefon" 
+          value={phone} 
+          onChange={(e) => setPhone(e.target.value)} 
+        />
         <button type="submit">Ekle</button>
       </form>
       <ul>
