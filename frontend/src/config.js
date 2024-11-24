@@ -1,2 +1,2 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://backend-service:5000";
+const API_BASE_URL = "http://54.175.35.178:30001";
 export default API_BASE_URL;

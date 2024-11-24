@@ -1,0 +1,12 @@
+# Node.js bağımlılıkları
+node_modules/
+
+# Kubernetes dosyaları
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfvars
+**/.terraform/
+**/terraform.tfstate.backup
+
+# Gitle ilgili dosyalar
+!.gitignore
