@@ -23,9 +23,10 @@ pipeline {
         }
         stage('Clone Repository') {
             steps {
-                sh '''
+                sh(script: '''
+                #!/bin/bash
                 git clone -b main ${env.GIT_REPO}
-                '''
+                ''', shell: '/bin/bash')
             }
         }
         stage('Run Security Scans') {
