@@ -24,7 +24,6 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 sh '''
-                #!/bin/bash
                 git clone -b main ${env.GIT_REPO}
                 '''
             }
