@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - mern-network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: sample_training
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    image: mecit35/mern-project-backend
+    container_name: backend
+    ports:
+      - "5050:5050"
+    networks:
+      - mern-network
+    depends_on:
+      - mongodb
+    environment:
+      ATLAS_URI: mongodb://admin:secret@mongodb:27017/sample_training?authSource=admin
+
+  frontend:
+    image: mecit35/mern-project-frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - mern-network
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
+
+networks:
+  mern-network:
+    driver: bridge

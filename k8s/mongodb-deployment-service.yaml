@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mongodb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: mongodb
+    spec:
+      containers:
+        - image: mongo
+          name: mongodb
+          ports: 
+            - containerPort: 27017
+          envFrom:
+            - secretRef:
+                name: mongo-secret
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongo-data
+      restartPolicy: Always
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-data
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  labels:
+    name: mongodb
+spec:
+  selector:
+    name: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+  

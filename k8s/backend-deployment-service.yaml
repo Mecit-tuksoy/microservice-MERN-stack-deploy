@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: backend
+  template:
+    metadata:
+      labels:
+        name: backend
+    spec:
+      containers:
+        - image: mecit35/mern-project-backend
+          name: backend
+          ports:
+            - containerPort: 5050
+          envFrom:
+            - secretRef:
+                name: mongo-secret
+          imagePullPolicy: Always
+      restartPolicy: Always
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  labels:
+    name: backend
+spec:
+  selector:
+    name: backend
+  type: NodePort
+  ports:
+    - port: 5050
+      targetPort: 5050
+      nodePort: 30001
+  
