@@ -24,6 +24,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 sh '''
+                #!/bin/bash
                 rm -rf microservice-MERN-stack-deploy || true
                 git clone -b main ${env.GIT_REPO}
                 '''
