@@ -23,7 +23,10 @@ pipeline {
         }
         stage('Clone Repository') {
             steps {
-                git url: "${env.GIT_REPO}"
+                sh '''
+                rm -rf microservice-MERN-stack-deploy
+                git clone -b main ${env.GIT_REPO}
+                '''
             }
         }
         stage('Run Security Scans') {
