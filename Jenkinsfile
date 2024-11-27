@@ -174,19 +174,28 @@ pipeline {
                 script {
                     def publicIP = readFile('public_ips.txt').trim() // Dosyadan IP adresini oku ve boşlukları temizle
                     def prometheusTarget = "${publicIP}:9100" // Hedef IP ve port
+                    def configFilePath = '/etc/prometheus/prometheus.yml'
 
-                    // Prometheus konfigürasyon dosyasına her satırı tek tek eklemek
-                    sh """
-                    echo "  - job_name: eks" | sudo tee -a /etc/prometheus/prometheus.yml
-                    echo "    static_configs:" | sudo tee -a /etc/prometheus/prometheus.yml
-                    echo "      - targets: ['${prometheusTarget}']" | sudo tee -a /etc/prometheus/prometheus.yml
+                    // Konfigürasyon dosyasını oku
+                    def configFile = readFile(configFilePath)
 
-                    sudo systemctl restart prometheus
-                    """
+                    // "eks" job'ının ve hedef IP'nin konfigürasyon dosyasına zaten eklenip eklenmediğini kontrol et
+                    if (!configFile.contains("job_name: eks") || !configFile.contains(prometheusTarget)) {
+                        // Eğer eklenmemişse, ekleyelim
+                        sh """
+                            echo "  - job_name: eks" | sudo tee -a ${configFilePath}
+                            echo "    static_configs:" | sudo tee -a ${configFilePath}
+                            echo "      - targets: ['${prometheusTarget}']" | sudo tee -a ${configFilePath}
+
+                            sudo systemctl restart prometheus
+                        """
+                    } else {
+                        echo "Prometheus job already exists, no need to add it again."
+                    }
                 }
             }
         }
-        
+
         stage('Update Configuration Files') {
             steps {
                 script {
