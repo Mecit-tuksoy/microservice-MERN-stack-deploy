@@ -89,17 +89,22 @@ pipeline {
         }
         stage('Deploy Metrics Server and Node Exporter') {
             steps {
-                sh '''
-                aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
-                sleep(30)
-                # Metrics Server yükle
-                kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-                
-                # Node Exporter yükle
-                helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                helm repo update
-                helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
-                '''
+                script {
+                    sh '''
+                    aws eks update-kubeconfig --region ${env.AWS_REGION} --name ${env.EKS_CLUSTER_NAME}
+                    sleep 30
+                    
+                    # Metrics Server yükle
+                    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+                    
+                    # Helm deposu ekle
+                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                    helm repo update
+                    
+                    # Node Exporter yükle
+                    helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
+                    '''
+                }
             }
         }
         stage('Retrieve Node Public IP for Prometheus') {
