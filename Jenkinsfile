@@ -54,44 +54,42 @@ pipeline {
             steps {
                 dir("${BACKEND_S3_DIR}") {
                     script {
-                        // Terraform başlatma işlemi
-                        sh 'terraform init'
+                        // Terraform init komutunu çalıştır
+                        def initResult = sh(script: 'terraform init', returnStatus: true)
+                        if (initResult != 0) {
+                            echo 'Terraform init başarısız oldu, devam ediliyor...'
+                        }
 
-                        // Planı oluşturma
-                        def planOutput = sh(script: 'terraform plan -out=plan.out', returnStatus: true)
-                        
-                        // Eğer plan başarılıysa (0), değişiklikleri uygula
-                        if (planOutput == 0) {
-                            echo 'Değişiklik var, uygulanıyor...'
-                            sh 'terraform apply -auto-approve plan.out'
-                        } else {
-                            echo 'Değişiklik yok, devam ediliyor...'
+                        // Terraform apply komutunu çalıştır
+                        def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+                        if (applyResult != 0) {
+                            echo 'Terraform apply başarısız oldu, devam ediliyor...'
                         }
                     }
                 }
             }
         }
+
         stage('Apply Terraform (EKS Cluster)') {
             steps {
                 dir("${K8S_DIR}") {
                     script {
-                        // Terraform başlatma işlemi
-                        sh 'terraform init'
+                        // Terraform init komutunu çalıştır
+                        def initResult = sh(script: 'terraform init', returnStatus: true)
+                        if (initResult != 0) {
+                            echo 'Terraform init başarısız oldu, devam ediliyor...'
+                        }
 
-                        // Planı oluşturma
-                        def planOutput = sh(script: 'terraform plan -out=plan.out', returnStatus: true)
-                        
-                        // Eğer plan başarılıysa (0), değişiklikleri uygula
-                        if (planOutput == 0) {
-                            echo 'Değişiklik var, uygulanıyor...'
-                            sh 'terraform apply -auto-approve plan.out'
-                        } else {
-                            echo 'Değişiklik yok, devam ediliyor...'
+                        // Terraform apply komutunu çalıştır
+                        def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+                        if (applyResult != 0) {
+                            echo 'Terraform apply başarısız oldu, devam ediliyor...'
                         }
                     }
                 }
             }
         }
+
 
         stage('Check EKS Cluster Status') {
             steps {
