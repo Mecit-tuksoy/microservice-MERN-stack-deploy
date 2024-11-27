@@ -50,22 +50,24 @@ pipeline {
                 }
             }
         }
-stage('Apply Terraform (Backend Resources)') {
-    steps {
-        dir("${BACKEND_S3_DIR}") {
-            script {
-                // Terraform başlatma işlemi
-                sh 'terraform init'
+        stage('Apply Terraform (Backend Resources)') {
+            steps {
+                dir("${BACKEND_S3_DIR}") {
+                    script {
+                        // Terraform başlatma işlemi
+                        sh 'terraform init'
 
-                // Planı oluşturma
-                def planOutput = sh(script: 'terraform plan -out=plan.out', returnStatus: true)
-                
-                // Eğer plan başarılıysa (0), değişiklikleri uygula
-                if (planOutput == 0) {
-                    echo 'Değişiklik var, uygulanıyor...'
-                    sh 'terraform apply -auto-approve plan.out'
-                } else {
-                    echo 'Değişiklik yok, devam ediliyor...'
+                        // Planı oluşturma
+                        def planOutput = sh(script: 'terraform plan -out=plan.out', returnStatus: true)
+                        
+                        // Eğer plan başarılıysa (0), değişiklikleri uygula
+                        if (planOutput == 0) {
+                            echo 'Değişiklik var, uygulanıyor...'
+                            sh 'terraform apply -auto-approve plan.out'
+                        } else {
+                            echo 'Değişiklik yok, devam ediliyor...'
+                        }
+                    }
                 }
             }
         }
@@ -73,20 +75,20 @@ stage('Apply Terraform (Backend Resources)') {
             steps {
                 dir("${K8S_DIR}") {
                     script {
-                // Terraform başlatma işlemi
-                sh 'terraform init'
+                        // Terraform başlatma işlemi
+                        sh 'terraform init'
 
-                // Planı oluşturma
-                def planOutput = sh(script: 'terraform plan -out=plan.out', returnStatus: true)
-                
-                // Eğer plan başarılıysa (0), değişiklikleri uygula
-                if (planOutput == 0) {
-                    echo 'Değişiklik var, uygulanıyor...'
-                    sh 'terraform apply -auto-approve plan.out'
-                } else {
-                    echo 'Değişiklik yok, devam ediliyor...'
-                }
-            }
+                        // Planı oluşturma
+                        def planOutput = sh(script: 'terraform plan -out=plan.out', returnStatus: true)
+                        
+                        // Eğer plan başarılıysa (0), değişiklikleri uygula
+                        if (planOutput == 0) {
+                            echo 'Değişiklik var, uygulanıyor...'
+                            sh 'terraform apply -auto-approve plan.out'
+                        } else {
+                            echo 'Değişiklik yok, devam ediliyor...'
+                        }
+                    }
                 }
             }
         }
