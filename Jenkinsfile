@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: ${env.GIT_REPO}
+                git branch: 'main', url: "${env.GIT_REPO}"
             }
         }
         stage('Run Security Scans') {
