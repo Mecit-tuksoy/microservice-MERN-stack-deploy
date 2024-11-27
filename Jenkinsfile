@@ -125,7 +125,6 @@ pipeline {
                     
                     while (eksStatus != "ACTIVE") {
                         echo "EKS Cluster is not active yet, waiting..."
-                        sleep(30) // 30 saniye bekle
                         eksStatus = sh(
                             script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
                             returnStdout: true
@@ -139,7 +138,6 @@ pipeline {
         stage('Deploy Metrics Server and Node Exporter') {
             steps {
                 script {
-                    // `sh` komutunu bash ile çalıştırıyoruz
                     sh '''#!/bin/bash
                     aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
                     sleep 30
@@ -150,6 +148,9 @@ pipeline {
                     # Helm deposu ekle
                     helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
                     helm repo update
+                    
+                    # Var olan node-exporter release'ini sil
+                    helm uninstall node-exporter --namespace kube-system || true
                     
                     # Node Exporter yükle
                     helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
