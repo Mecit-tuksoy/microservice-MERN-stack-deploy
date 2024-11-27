@@ -3,6 +3,8 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         EKS_CLUSTER_NAME = 'my-eks-cluster'
+        AWS_ACCESS_KEY_ID = credentials('my-aws-credentials')
+        AWS_SECRET_ACCESS_KEY = credentials('my-aws-credentials')
         FRONTEND_DIR = 'client'
         BACKEND_DIR = 'server'
         EKS_DIR = 'k8s'

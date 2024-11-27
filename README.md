@@ -87,3 +87,17 @@ http://backend-service:5050/record
 curl http://localhost:5050/record
 
 
+# kubeconfig:
+aws eks update-kubeconfig --region us-east-1 --name my-eks-cluster
+
+# kubectl control:
+
+kubectl version --client
+
+
+# aws kimlik bilgilerini tanımla:
+Jenkins ana sayfasına git.
+Manage Jenkins → Manage Credentials → Global Credentials.
+Add Credentials ile aşağıdaki değerleri gir:
+AWS Access Key ID: IAM kullanıcısına ait access key.
+AWS Secret Access Key: Secret key.
