@@ -1,7 +1,8 @@
+// jest.config.js
 export default {
-  setupFiles: ["<rootDir>/loadEnvironment.mjs"],
   testEnvironment: "node",
   transform: {
-    "^.+\\.mjs$": "babel-jest", // Babel ile .mjs dosyalarını dönüştür
+    "^.+\\.mjs$": "babel-jest", // ES6 modüllerini Babel ile dönüştür
   },
+  extensionsToTreatAsEsm: [".js"], // Jest'in JS dosyalarını ESM olarak işlemesini sağla
 };
