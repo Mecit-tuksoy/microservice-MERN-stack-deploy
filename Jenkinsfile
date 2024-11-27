@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/Mecit-tuksoy/microservice-MERN-stack-deploy.git'
+                git branch: 'main', url: ${env.GIT_REPO}
             }
         }
         stage('Run Security Scans') {
@@ -56,16 +56,26 @@ pipeline {
             steps {
                 dir("${BACKEND_S3_DIR}") {
                     script {
-                        // Terraform init komutunu çalıştır
-                        def initResult = sh(script: 'terraform init', returnStatus: true)
-                        if (initResult != 0) {
-                            echo 'Terraform init başarısız oldu, devam ediliyor...'
-                        }
+                        // AWS CLI komutu ile 'mecit-terraform-state/terraform/state/MERN.tfstate' dosyasının var olup olmadığını kontrol et
+                        def fileExists = sh(script: "aws s3 ls s3://mecit-terraform-state/terraform/state/MERN.tfstate", returnStatus: true)
+                        
+                        // Eğer dosya mevcutsa, Terraform işlemini atla
+                        if (fileExists == 0) {
+                            echo "Dosya 'MERN.tfstate' mevcut, Terraform işlemi atlanıyor."
+                        } else {
+                            echo "Dosya 'MERN.tfstate' bulunamadı, Terraform işlemi başlatılıyor."
 
-                        // Terraform apply komutunu çalıştır
-                        def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
-                        if (applyResult != 0) {
-                            echo 'Terraform apply başarısız oldu, devam ediliyor...'
+                            // Terraform init komutunu çalıştır
+                            def initResult = sh(script: 'terraform init', returnStatus: true)
+                            if (initResult != 0) {
+                                echo 'Terraform init başarısız oldu, devam ediliyor...'
+                            }
+
+                            // Terraform apply komutunu çalıştır
+                            def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+                            if (applyResult != 0) {
+                                echo 'Terraform apply başarısız oldu, devam ediliyor...'
+                            }
                         }
                     }
                 }
@@ -113,11 +123,13 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy Metrics Server and Node Exporter') {
             steps {
                 script {
-                    sh '''
-                    aws eks update-kubeconfig --region ${env.AWS_REGION} --name ${env.EKS_CLUSTER_NAME}
+                    // `sh` komutunu bash ile çalıştırıyoruz
+                    sh '''#!/bin/bash
+                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
                     sleep 30
                     
                     # Metrics Server yükle
