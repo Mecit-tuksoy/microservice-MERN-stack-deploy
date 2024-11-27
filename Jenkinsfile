@@ -177,9 +177,9 @@ pipeline {
 
                     // Prometheus konfigürasyon dosyasına her satırı tek tek eklemek
                     sh """
-                    echo "- job_name: 'eks'" | sudo tee -a /etc/prometheus/prometheus.yml
-                    echo "  static_configs:" | sudo tee -a /etc/prometheus/prometheus.yml
-                    echo "    - targets: ['${prometheusTarget}']" | sudo tee -a /etc/prometheus/prometheus.yml
+                    echo "  - job_name: 'eks'" | sudo tee -a /etc/prometheus/prometheus.yml
+                    echo "    static_configs:" | sudo tee -a /etc/prometheus/prometheus.yml
+                    echo "      - targets: ['${prometheusTarget}']" | sudo tee -a /etc/prometheus/prometheus.yml
 
                     sudo systemctl restart prometheus
                     """
