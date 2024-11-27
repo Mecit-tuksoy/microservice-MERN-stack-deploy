@@ -1,9 +1,11 @@
-export default {
+module.exports = {
+  preset: 'ts-jest', // Eğer TypeScript kullanıyorsanız
   transform: {
-    "^.+\\.[t|j]sx?$": "babel-jest"
+    '^.+\\.m?js$': 'babel-jest', // .js ve .mjs dosyalarını Babel ile dönüştür
   },
-  testEnvironment: "node", 
+  testEnvironment: 'node',
   transformIgnorePatterns: [
-    "/node_modules/(?!supertest|express)/"  // Jest'in `supertest` ve `express` gibi bazı modülleri de dönüştürmesine izin ver
-  ]
+    '/node_modules/',
+  ],
+  moduleFileExtensions: ['js', 'json', 'mjs'], // .js, .json ve .mjs dosyalarına izin verir
 };
