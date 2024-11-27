@@ -2,7 +2,6 @@
   "name": "server",
   "version": "1.0.0",
   "description": "Node.js, Express, and MongoDB REST CRUD API",
-  "type": "module",
   "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs",
