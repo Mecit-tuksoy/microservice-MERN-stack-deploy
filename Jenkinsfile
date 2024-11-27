@@ -175,12 +175,11 @@ pipeline {
                     def publicIP = readFile('public_ips.txt').trim() // Dosyadan IP adresini oku ve boşlukları temizle
                     sh """
                     sudo tee -a /etc/prometheus/prometheus.yml <<EOF
-                    
-                    - job_name: 'eks'
-                      static_configs:
-                        - targets: ['${publicIP}:9100']
-                    EOF
-                    
+        - job_name: 'eks'
+            static_configs:
+            - targets: ['${publicIP}:9100']
+        EOF
+
                     sudo systemctl restart prometheus
                     """
                 }

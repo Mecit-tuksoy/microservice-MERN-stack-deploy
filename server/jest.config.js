@@ -1,8 +1,6 @@
 export default {
   transform: {
-    '^.+\\.(js|jsx|mjs)$': 'babel-jest', // Babel kullanarak ESM'yi dönüştür
+    "^.+\\.mjs$": "babel-jest"
   },
-  transformIgnorePatterns: [
-    '/node_modules/',
-  ],
+  extensionsToTreatAsEsm: [".mjs"],
 };
