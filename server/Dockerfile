@@ -10,11 +10,17 @@ COPY package*.json ./
 # 4. Bağımlılıkları yükle
 RUN npm install
 
-# 5. Uygulama dosyalarını kopyala
+# 5. Uygulama dosyalarını kopyala (npm install'dan sonra kopyalanmalı)
 COPY . .
 
-# 6. Uygulamanın çalışacağı portu belirle
+# 6. Test bağımlılıklarını yükle
+RUN npm install --save-dev jest
+
+# 7. Uygulamanın çalışacağı portu belirle
 EXPOSE 5050
 
-# 7. Uygulamayı başlat
+# 8. Testleri çalıştır
+RUN npm test
+
+# 9. Uygulamayı başlat
 CMD ["npm", "start"]
