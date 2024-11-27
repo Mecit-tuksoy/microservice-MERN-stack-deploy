@@ -1,6 +1,5 @@
 export default {
-  transform: {
-    "^.+\\.mjs$": "babel-jest"
-  },
+  setupFiles: ["<rootDir>/loadEnvironment.mjs"],
   extensionsToTreatAsEsm: [".mjs"],
+  testEnvironment: "node",
 };

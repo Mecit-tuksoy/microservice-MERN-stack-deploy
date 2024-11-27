@@ -173,13 +173,14 @@ pipeline {
             steps {
                 script {
                     def publicIP = readFile('public_ips.txt').trim() // Dosyadan IP adresini oku ve boşlukları temizle
+                    def prometheusTarget = "      - targets: ['${publicIP}:9100']"
                     sh """
-                    sudo tee -a /etc/prometheus/prometheus.yml <<EOF
-        - job_name: 'eks'
-            static_configs:
-            - targets: ['${publicIP}:9100']
-        EOF
-
+                    echo "
+                    - job_name: 'eks'
+                      static_configs:
+                        ${prometheusTarget}
+                    " | sudo tee -a /etc/prometheus/prometheus.yml
+                    
                     sudo systemctl restart prometheus
                     """
                 }
@@ -215,8 +216,8 @@ pipeline {
             steps {
                 sh '''
                 # Build and tag Docker images
-                docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
-                docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
+                DOCKER_BUILDKIT=1 docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
+                DOCKER_BUILDKIT=1 docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
 
                 # Run tests for backend
                 docker run --rm mecit35/mern-project-backend:latest npm test > ${TEST_RESULT_LOG_FILE}

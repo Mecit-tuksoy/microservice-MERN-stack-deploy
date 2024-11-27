@@ -16,8 +16,5 @@ RUN npm install --save-dev jest supertest babel-jest @babel/core @babel/preset-e
 # Uygulamanın çalışacağı portu belirle
 EXPOSE 5050
 
-# Testleri çalıştır
-RUN npm test
-
 # Varsayılan komut
 CMD ["npm", "start"]
