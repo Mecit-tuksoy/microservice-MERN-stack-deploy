@@ -1,5 +1,7 @@
 export default {
-  setupFiles: ["<rootDir>/loadEnvironment.mjs"],  // loadEnvironment.mjs dosyasını setupFiles'a dahil edin
-  extensionsToTreatAsEsm: [],  // .mjs uzantısını extensionsToTreatAsEsm'ye eklemeyin
-  testEnvironment: "node",  // Node ortamında testleri çalıştır
+  setupFiles: ["<rootDir>/loadEnvironment.mjs"],
+  testEnvironment: "node",
+  transform: {
+    "^.+\\.mjs$": "babel-jest", // Babel ile .mjs dosyalarını dönüştür
+  },
 };
