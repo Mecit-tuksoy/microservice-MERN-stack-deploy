@@ -1,7 +1,8 @@
 export default {
-    transform: {
-      "^.+\\.[tj]sx?$": "babel-jest", // Babel kullanarak JS/TS dosyalarını dönüştürmek
-    },
-    testEnvironment: "node", // Node.js ortamında test çalıştırmak
-  };
-  
+  transform: {
+    '^.+\\.(js|jsx|mjs)$': 'babel-jest', // Babel kullanarak ESM'yi dönüştür
+  },
+  transformIgnorePatterns: [
+    '/node_modules/',
+  ],
+};
