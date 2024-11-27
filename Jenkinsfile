@@ -140,7 +140,6 @@ pipeline {
                 script {
                     sh '''#!/bin/bash
                     aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
-                    sleep 30
                     
                     # Metrics Server yükle
                     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -174,7 +173,7 @@ pipeline {
             steps {
                 script {
                     def publicIP = readFile('public_ips.txt').trim() // Dosyadan IP adresini oku ve boşlukları temizle
-                    def prometheusTarget = "      - targets: ['${publicIP}:9100']"
+                    def prometheusTarget = "- targets: ['${publicIP}:9100']"
                     sh """
                     echo "
                     - job_name: 'eks'
@@ -224,8 +223,8 @@ pipeline {
                 # Run tests for backend
                 docker run --rm mecit35/mern-project-backend:latest npm test > ${TEST_RESULT_LOG_FILE}
 
-                # Run tests for frontend
-                docker run --rm mecit35/mern-project-frontend:latest npm test >> ${TEST_RESULT_LOG_FILE}
+                # Run tests for frontend            
+                docker run --rm mecit35/mern-project-frontend:latest npm run test:cypress >> ${TEST_RESULT_LOG_FILE}
                 '''
             }
         }
