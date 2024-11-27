@@ -72,7 +72,17 @@ pipeline {
             steps {
                 dir("${K8S_DIR}") {
                     sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
+                    script {
+                        def planOutput = sh(script: 'terraform plan -detailed-exitcode', returnStatus: true)
+                        if (planOutput == 0) {
+                            echo "No changes detected, skipping terraform apply."
+                        } else if (planOutput == 2) {
+                            echo "Changes detected, applying terraform..."
+                            sh 'terraform apply -auto-approve'
+                        } else {
+                            error("Terraform plan failed.")
+                        }
+                    }
                 }
             }
         }
