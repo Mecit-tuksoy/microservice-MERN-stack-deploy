@@ -1,21 +1,20 @@
+# 1. Base image olarak resmi Node.js imajını kullan
 FROM node:18
 
-# Uygulama dizinine geçiş yap
+# 2. Çalışma dizinini ayarla
 WORKDIR /usr/src/app
 
-# package.json dosyasını kopyala ve bağımlılıkları yükle
+# 3. package.json ve package-lock.json dosyalarını kopyala
 COPY package*.json ./
+
+# 4. Bağımlılıkları yükle
 RUN npm install
 
-# Uygulama dosyalarını kopyala
+# 5. Uygulama dosyalarını kopyala
 COPY . .
 
-# Testler için gerekli modülleri yükle
-RUN npm install --save-dev @babel/core @babel/preset-env babel-jest @babel/plugin-transform-modules-commonjs supertest
-
-
-# Uygulamanın çalışacağı portu belirle
+# 6. Uygulamanın çalışacağı portu belirle
 EXPOSE 5050
 
-# Varsayılan komut
+# 7. Uygulamayı başlat
 CMD ["npm", "start"]

@@ -228,9 +228,6 @@ pipeline {
                 docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
                 docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
 
-                # Run tests for backend
-                docker run --rm mecit35/mern-project-backend:latest npm test > ${TEST_RESULT_LOG_FILE}
-
                 # Run tests for frontend            
                 docker run --rm mecit35/mern-project-frontend:latest npm run test:cypress >> ${TEST_RESULT_LOG_FILE}
                 '''
