@@ -11,7 +11,7 @@ RUN npm install
 COPY . .
 
 # Testler için gerekli modülleri yükle
-RUN npm install --save-dev @babel/core @babel/preset-env babel-jest @babel/plugin-transform-modules-commonjs
+RUN npm install --save-dev @babel/core @babel/preset-env babel-jest @babel/plugin-transform-modules-commonjs supertest
 
 
 # Uygulamanın çalışacağı portu belirle
