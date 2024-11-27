@@ -86,16 +86,28 @@ pipeline {
             steps {
                 dir("${K8S_DIR}") {
                     script {
-                        // Terraform init komutunu çalıştır
-                        def initResult = sh(script: 'terraform init', returnStatus: true)
-                        if (initResult != 0) {
-                            echo 'Terraform init başarısız oldu, devam ediliyor...'
-                        }
+                        // EKS Cluster durumu kontrol et
+                        def eksStatus = sh(
+                            script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
+                            returnStdout: true
+                        ).trim()
+                        
+                        if (eksStatus == "ACTIVE") {
+                            echo "EKS Cluster already active. Skipping Terraform apply step."
+                        } else {
+                            echo "EKS Cluster is not active. Running Terraform apply step."
 
-                        // Terraform apply komutunu çalıştır
-                        def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
-                        if (applyResult != 0) {
-                            echo 'Terraform apply başarısız oldu, devam ediliyor...'
+                            // Terraform init komutunu çalıştır
+                            def initResult = sh(script: 'terraform init', returnStatus: true)
+                            if (initResult != 0) {
+                                echo 'Terraform init failed, continuing...'
+                            }
+
+                            // Terraform apply komutunu çalıştır
+                            def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+                            if (applyResult != 0) {
+                                echo 'Terraform apply failed, continuing...'
+                            }
                         }
                     }
                 }
@@ -164,9 +176,8 @@ pipeline {
                     def prometheusTarget = "      - targets: ['${publicIP}:9100']"
                     sh """
                     echo "
-                    scrape_configs:
                     - job_name: 'eks'
-                        static_configs:
+                      static_configs:
                         ${prometheusTarget}
                     " | sudo tee -a /etc/prometheus/prometheus.yml
                     
