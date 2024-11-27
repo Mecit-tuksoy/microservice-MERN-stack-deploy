@@ -1,6 +1,10 @@
-export default {
-  testEnvironment: "node",
+module.exports = {
   transform: {
-    "^.+\\.[tj]sx?$": "babel-jest", // Babel ile dosyaları dönüştür
+    // Babel kullanarak .js ve .mjs dosyalarını dönüştür
+    "^.+\\.[t|j]sx?$": "babel-jest"
   },
+  testEnvironment: "node", // Node.js ortamında test yapacağız
+  transformIgnorePatterns: [
+    "/node_modules/(?!supertest)/" // supertest gibi bağımlılıkların dönüştürülmesini sağlıyoruz
+  ]
 };
