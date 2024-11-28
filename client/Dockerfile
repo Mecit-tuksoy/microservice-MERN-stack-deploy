@@ -20,7 +20,7 @@ RUN apt-get install -y libnss3 --no-install-recommends
 RUN apt-get install -y libxss1 --no-install-recommends 
 RUN apt-get install -y libasound2 --no-install-recommends 
 RUN apt-get install -y libxtst6 --no-install-recommends 
-# RUN apt-get install -y libXcomposite --no-install-recommends 
+RUN apt-get install -y libxcomposite1 --no-install-recommends 
 RUN apt-get install -y xvfb --no-install-recommends 
 
 # Projenin geri kalanını kopyala
