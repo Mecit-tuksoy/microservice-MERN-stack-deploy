@@ -11,21 +11,17 @@ COPY package*.json ./
 RUN npm install
 
 # Cypress'in çalışması için gerekli olan bağımlılıkları yükle
-RUN apt-get update && apt-get install -y \
-    libgtk2.0-0 \
-    libgtk-3-0 \
-    libgbm-dev \
-    libnotify-dev \
-    libgconf-2-4 \
-    libnss3 \
-    libxss1 \
-    libasound2 \
-    libxtst6 \
-    libXcomposite1 \
-    xvfb \
-    --no-install-recommends && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libgtk2.0-0 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libgtk-3-0 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libgbm-dev --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libnotify-dev --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libgconf-2-4 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libnss3 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libxss1 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libasound2 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libxtst6 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y libXcomposite1 --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y xvfb --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Projenin geri kalanını kopyala
 COPY . .
