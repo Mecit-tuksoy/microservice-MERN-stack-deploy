@@ -331,25 +331,16 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Cypress testlerini çalıştırırken gerekli terminal değişkenini ayarla
-                    sh '''
-                        export TERM=xterm
-                        cd client
-                        npx cypress run --reporter json > ${TEST_RESULT_LOG_FILE}
-                                   
-                    '''
-                    // npx cypress run --browser chrome --headless --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
-                        // npx cypress run --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
-                    // sh '''
-                    //     cd client/cypress/results
-                    //     mv test-output.xml ${TEST_RESULT_LOG_FILE}
-                    // '''
-                
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        sh '''
+                            cd client
+                            npx cypress run --reporter json > ${TEST_RESULT_LOG_FILE}   
+                            mv ${TEST_RESULT_LOG_FILE} $WORKSPACE           
+                        '''                 
+                        }
                 }
             }
         }
-
-    }
 
     post {
      always {
