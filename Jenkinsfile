@@ -328,19 +328,22 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Run Cypress Tests') {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        sh '''
-                            cd client
-                            npx cypress run --reporter json > ${TEST_RESULT_LOG_FILE}   
-                            mv ${TEST_RESULT_LOG_FILE} $WORKSPACE           
-                        '''                 
-                        }
+                    sh '''
+                        cd client
+                        npx cypress run --reporter json > ${TEST_RESULT_LOG_FILE}
+                        mv ${TEST_RESULT_LOG_FILE} $WORKSPACE    
+                    '''
+                    }
+                                
                 }
             }
         }
+
+    }
 
     post {
      always {
@@ -353,5 +356,6 @@ pipeline {
             attachmentsPattern: "${TEST_RESULT_FILE},${POST_GET_RESULT_FILE},${BUILD_LOG_FILE},${TEST_RESULT_LOG_FILE},${IMAGE_TEST_RESULT_FILE}"
         }
     }
-    }
+    
 }
+       
