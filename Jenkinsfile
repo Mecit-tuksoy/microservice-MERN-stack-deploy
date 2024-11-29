@@ -206,43 +206,43 @@ pipeline {
         //     }
         // }
 
-        // stage('Update Configuration Files') {
-        //     steps {
-        //         script {
-        //             // Daha önce kaydedilen public IP adreslerini oku
-        //             def publicIPs = readFile('public_ips.txt').trim().split("\n")
+        stage('Update Configuration Files') {
+            steps {
+                script {
+                    // Daha önce kaydedilen public IP adreslerini oku
+                    def publicIPs = readFile('public_ips.txt').trim().split("\n")
                     
-        //             // İlk IP'yi kullanmak istiyorsanız:
-        //             def workerNodeIP = publicIPs[0]
+                    // İlk IP'yi kullanmak istiyorsanız:
+                    def workerNodeIP = publicIPs[0]
 
-        //             // Değişiklik yapılacak dosyaların listesi
-        //             def filesToUpdate = [
-        //                 "${FRONTEND_DIR}/src/components/create.js",
-        //                 "${FRONTEND_DIR}/src/components/edit.js",
-        //                 "${FRONTEND_DIR}/src/components/healthcheck.js",
-        //                 "${FRONTEND_DIR}/src/components/recordList.js",
-        //                 "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
-        //                 "${FRONTEND_DIR}/cypress.json"
-        //             ]
+                    // Değişiklik yapılacak dosyaların listesi
+                    def filesToUpdate = [
+                        "${FRONTEND_DIR}/src/components/create.js",
+                        "${FRONTEND_DIR}/src/components/edit.js",
+                        "${FRONTEND_DIR}/src/components/healthcheck.js",
+                        "${FRONTEND_DIR}/src/components/recordList.js",
+                        "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
+                        "${FRONTEND_DIR}/cypress.json"
+                    ]
 
-        //             // Her dosyada localhost ifadesini değiştir
-        //             filesToUpdate.each { file ->
-        //                 sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
-        //             }
-        //         }
-        //     }
-        // }
+                    // Her dosyada localhost ifadesini değiştir
+                    filesToUpdate.each { file ->
+                        sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
+                    }
+                }
+            }
+        }
 
      
-        // stage('Tag and Build  Application') {
-        //     steps {
-        //         sh '''
-        //         # Build and tag Docker images
-        //         docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
-        //         docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
-        //         '''
-        //     }
-        // }
+        stage('Tag and Build  Application') {
+            steps {
+                sh '''
+                # Build and tag Docker images
+                docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
+                docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
+                '''
+            }
+        }
         // stage('Run Security Scans on Docker Images') {
         //     steps {
         //         sh '''
@@ -254,27 +254,27 @@ pipeline {
         //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
         //     }
         // }
-        // stage('Push Docker Images') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-        //             sh '''
-        //             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-        //             docker push mecit35/mern-project-frontend:latest
-        //             docker push mecit35/mern-project-backend:latest
-        //             '''
-        //         }
-        //     }
-        // }
-
-
-
-        stage('Configure EKS and Deploy Resources') {
+        stage('Push Docker Images') {
             steps {
-                sh '''
-                kubectl apply -f ${EKS_DIR}
-                '''
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push mecit35/mern-project-frontend:latest
+                    docker push mecit35/mern-project-backend:latest
+                    '''
+                }
             }
         }
+
+
+
+        // stage('Configure EKS and Deploy Resources') {
+        //     steps {
+        //         sh '''
+        //         kubectl apply -f ${EKS_DIR}
+        //         '''
+        //     }
+        // }
 
         // stage('Test Application Deployment') {
         //     steps {
