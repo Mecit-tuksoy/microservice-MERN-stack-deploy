@@ -29,156 +29,156 @@ pipeline {
                 git branch: 'main', url: "${env.GIT_REPO}"
             }
         }
-        stage('Run Security Scans') {
-            steps {
-                sh '''
-                curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/scripts/install.sh | sh
-                trivy fs --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE} 
-                '''
-                // trivy fs --exit-code 1 --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE}   (pipeline risk varsa durur.)
-            }
-        }
-        stage('Check Security Scan Results') {
-            steps {
-                script {
-                    if (fileExists(env.TEST_RESULT_FILE)) {
-                        def scanResults = readFile(env.TEST_RESULT_FILE)
-                        if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {
-                            echo "Warning: Security scan found vulnerabilities. Please address them."
-                        }
-                        // if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {       //test aşamasında gerek yok
-                        //     error("Security scan failed. Please fix vulnerabilities.")
-                        // }
-                    }
-                }
-            }
-        }
-        stage('Apply Terraform (Backend Resources)') {
-            steps {
-                dir("${BACKEND_S3_DIR}") {
-                    script {
-                        // AWS CLI komutu ile 'mecit-terraform-state/terraform/state/MERN.tfstate' dosyasının var olup olmadığını kontrol et
-                        def fileExists = sh(script: "aws s3 ls s3://mecit-terraform-state/terraform/state/MERN.tfstate", returnStatus: true)
+        // stage('Run Security Scans') {
+        //     steps {
+        //         sh '''
+        //         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/scripts/install.sh | sh
+        //         trivy fs --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE} 
+        //         '''
+        //         // trivy fs --exit-code 1 --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE}   (pipeline risk varsa durur.)
+        //     }
+        // }
+        // stage('Check Security Scan Results') {
+        //     steps {
+        //         script {
+        //             if (fileExists(env.TEST_RESULT_FILE)) {
+        //                 def scanResults = readFile(env.TEST_RESULT_FILE)
+        //                 if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {
+        //                     echo "Warning: Security scan found vulnerabilities. Please address them."
+        //                 }
+        //                 // if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {       //test aşamasında gerek yok
+        //                 //     error("Security scan failed. Please fix vulnerabilities.")
+        //                 // }
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Apply Terraform (Backend Resources)') {
+        //     steps {
+        //         dir("${BACKEND_S3_DIR}") {
+        //             script {
+        //                 // AWS CLI komutu ile 'mecit-terraform-state/terraform/state/MERN.tfstate' dosyasının var olup olmadığını kontrol et
+        //                 def fileExists = sh(script: "aws s3 ls s3://mecit-terraform-state/terraform/state/MERN.tfstate", returnStatus: true)
                         
-                        // Eğer dosya mevcutsa, Terraform işlemini atla
-                        if (fileExists == 0) {
-                            echo "Dosya 'MERN.tfstate' mevcut, Terraform işlemi atlanıyor."
-                        } else {
-                            echo "Dosya 'MERN.tfstate' bulunamadı, Terraform işlemi başlatılıyor."
+        //                 // Eğer dosya mevcutsa, Terraform işlemini atla
+        //                 if (fileExists == 0) {
+        //                     echo "Dosya 'MERN.tfstate' mevcut, Terraform işlemi atlanıyor."
+        //                 } else {
+        //                     echo "Dosya 'MERN.tfstate' bulunamadı, Terraform işlemi başlatılıyor."
 
-                            // Terraform init komutunu çalıştır
-                            def initResult = sh(script: 'terraform init', returnStatus: true)
-                            if (initResult != 0) {
-                                echo 'Terraform init başarısız oldu, devam ediliyor...'
-                            }
+        //                     // Terraform init komutunu çalıştır
+        //                     def initResult = sh(script: 'terraform init', returnStatus: true)
+        //                     if (initResult != 0) {
+        //                         echo 'Terraform init başarısız oldu, devam ediliyor...'
+        //                     }
 
-                            // Terraform apply komutunu çalıştır
-                            def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
-                            if (applyResult != 0) {
-                                echo 'Terraform apply başarısız oldu, devam ediliyor...'
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                     // Terraform apply komutunu çalıştır
+        //                     def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+        //                     if (applyResult != 0) {
+        //                         echo 'Terraform apply başarısız oldu, devam ediliyor...'
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Apply Terraform (EKS Cluster)') {
-            steps {
-                dir("${K8S_DIR}") {
-                    script {
-                        // EKS Cluster durumu kontrol et
-                        def eksStatus = ''
-                        try {
-                            eksStatus = sh(
-                                script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
-                                returnStdout: true
-                            ).trim()
-                        } catch (Exception e) {
-                            // Eğer cluster mevcut değilse, hata alacağız ve eksStatus boş kalacak
-                            echo "EKS Cluster '${EKS_CLUSTER_NAME}' bulunamadı. Terraform ile oluşturulacak."
-                        }
+        // stage('Apply Terraform (EKS Cluster)') {
+        //     steps {
+        //         dir("${K8S_DIR}") {
+        //             script {
+        //                 // EKS Cluster durumu kontrol et
+        //                 def eksStatus = ''
+        //                 try {
+        //                     eksStatus = sh(
+        //                         script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
+        //                         returnStdout: true
+        //                     ).trim()
+        //                 } catch (Exception e) {
+        //                     // Eğer cluster mevcut değilse, hata alacağız ve eksStatus boş kalacak
+        //                     echo "EKS Cluster '${EKS_CLUSTER_NAME}' bulunamadı. Terraform ile oluşturulacak."
+        //                 }
 
-                        // Eğer cluster mevcut ve aktifse
-                        if (eksStatus == "ACTIVE") {
-                            echo "EKS Cluster '${EKS_CLUSTER_NAME}' zaten aktif. Terraform apply işlemi atlanıyor."
-                        } else {
-                            echo "EKS Cluster '${EKS_CLUSTER_NAME}' mevcut değil ya da aktif değil. Terraform apply işlemi başlatılıyor."
+        //                 // Eğer cluster mevcut ve aktifse
+        //                 if (eksStatus == "ACTIVE") {
+        //                     echo "EKS Cluster '${EKS_CLUSTER_NAME}' zaten aktif. Terraform apply işlemi atlanıyor."
+        //                 } else {
+        //                     echo "EKS Cluster '${EKS_CLUSTER_NAME}' mevcut değil ya da aktif değil. Terraform apply işlemi başlatılıyor."
 
-                            // Terraform init komutunu çalıştır
-                            def initResult = sh(script: 'terraform init', returnStatus: true)
-                            if (initResult != 0) {
-                                error 'Terraform init başarısız oldu, pipeline devam etmiyor.'
-                            }
+        //                     // Terraform init komutunu çalıştır
+        //                     def initResult = sh(script: 'terraform init', returnStatus: true)
+        //                     if (initResult != 0) {
+        //                         error 'Terraform init başarısız oldu, pipeline devam etmiyor.'
+        //                     }
 
-                            // Terraform apply komutunu çalıştır
-                            def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
-                            if (applyResult != 0) {
-                                error 'Terraform apply başarısız oldu, pipeline devam etmiyor.'
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                     // Terraform apply komutunu çalıştır
+        //                     def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+        //                     if (applyResult != 0) {
+        //                         error 'Terraform apply başarısız oldu, pipeline devam etmiyor.'
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
 
 
-        stage('Check EKS Cluster Status') {
+        // stage('Check EKS Cluster Status') {
+        //     steps {
+        //         script {
+        //             def eksStatus = sh(
+        //                 script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
+        //                 returnStdout: true
+        //             ).trim()
+                    
+        //             while (eksStatus != "ACTIVE") {
+        //                 echo "EKS Cluster is not active yet, waiting..."
+        //                 eksStatus = sh(
+        //                     script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
+        //                     returnStdout: true
+        //                 ).trim()
+        //             }
+        //             echo "EKS Cluster is active!"
+        //         }
+        //     }
+        // }
+
+        stage('Deploy Metrics Server and Node Exporter') {
             steps {
                 script {
-                    def eksStatus = sh(
-                        script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
-                        returnStdout: true
-                    ).trim()
+                    sh '''#!/bin/bash
+                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
                     
-                    while (eksStatus != "ACTIVE") {
-                        echo "EKS Cluster is not active yet, waiting..."
-                        eksStatus = sh(
-                            script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
-                            returnStdout: true
-                        ).trim()
-                    }
-                    echo "EKS Cluster is active!"
+                    # Metrics Server yükle
+                    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+                    
+                    # Helm deposu ekle
+                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                    helm repo update
+                    
+                    # Var olan node-exporter release'ini sil
+                    helm uninstall node-exporter --namespace kube-system || true
+                    
+                    # Node Exporter yükle
+                    helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
+                    '''
                 }
             }
         }
 
-        // stage('Deploy Metrics Server and Node Exporter') {
-        //     steps {
-        //         script {
-        //             sh '''#!/bin/bash
-        //             aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
-                    
-        //             # Metrics Server yükle
-        //             kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-                    
-        //             # Helm deposu ekle
-        //             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-        //             helm repo update
-                    
-        //             # Var olan node-exporter release'ini sil
-        //             helm uninstall node-exporter --namespace kube-system || true
-                    
-        //             # Node Exporter yükle
-        //             helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
-        //             '''
-        //         }
-        //     }
-        // }
-
-        // stage('Retrieve Node Public IP for Prometheus') {
-        //     steps {
-        //         script {
-        //             def publicIPs = sh(
-        //                 script: "kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'",
-        //                 returnStdout: true
-        //             ).trim().split(" ")
-        //             writeFile file: 'public_ips.txt', text: publicIPs.join("\n")
-        //             echo "Node Public IPs: ${publicIPs}"
-        //         }
-        //     }
-        // }
+        stage('Retrieve Node Public IP for Prometheus') {
+            steps {
+                script {
+                    def publicIPs = sh(
+                        script: "kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'",
+                        returnStdout: true
+                    ).trim().split(" ")
+                    writeFile file: 'public_ips.txt', text: publicIPs.join("\n")
+                    echo "Node Public IPs: ${publicIPs}"
+                }
+            }
+        }
         // stage('Update Prometheus Configuration') {
         //     steps {
         //         script {
@@ -206,43 +206,43 @@ pipeline {
         //     }
         // }
 
-        // stage('Update Configuration Files') {
-        //     steps {
-        //         script {
-        //             // Daha önce kaydedilen public IP adreslerini oku
-        //             def publicIPs = readFile('public_ips.txt').trim().split("\n")
+        stage('Update Configuration Files') {
+            steps {
+                script {
+                    // Daha önce kaydedilen public IP adreslerini oku
+                    def publicIPs = readFile('public_ips.txt').trim().split("\n")
                     
-        //             // İlk IP'yi kullanmak istiyorsanız:
-        //             def workerNodeIP = publicIPs[0]
+                    // İlk IP'yi kullanmak istiyorsanız:
+                    def workerNodeIP = publicIPs[0]
 
-        //             // Değişiklik yapılacak dosyaların listesi
-        //             def filesToUpdate = [
-        //                 "${FRONTEND_DIR}/src/components/create.js",
-        //                 "${FRONTEND_DIR}/src/components/edit.js",
-        //                 "${FRONTEND_DIR}/src/components/healthcheck.js",
-        //                 "${FRONTEND_DIR}/src/components/recordList.js",
-        //                 "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
-        //                 "${FRONTEND_DIR}/cypress.json"
-        //             ]
+                    // Değişiklik yapılacak dosyaların listesi
+                    def filesToUpdate = [
+                        "${FRONTEND_DIR}/src/components/create.js",
+                        "${FRONTEND_DIR}/src/components/edit.js",
+                        "${FRONTEND_DIR}/src/components/healthcheck.js",
+                        "${FRONTEND_DIR}/src/components/recordList.js",
+                        "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
+                        "${FRONTEND_DIR}/cypress.json"
+                    ]
 
-        //             // Her dosyada <worker-node-public-ip> ifadesini değiştir
-        //             filesToUpdate.each { file ->
-        //                 sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
-        //             }
-        //         }
-        //     }
-        // }
+                    // Her dosyada localhost ifadesini değiştir
+                    filesToUpdate.each { file ->
+                        sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
+                    }
+                }
+            }
+        }
 
      
-        // stage('Tag, Build, and Test Application') {
-        //     steps {
-        //         sh '''
-        //         # Build and tag Docker images
-        //         docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
-        //         docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
-        //         '''
-        //     }
-        // }
+        stage('Tag and Build  Application') {
+            steps {
+                sh '''
+                # Build and tag Docker images
+                docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
+                docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
+                '''
+            }
+        }
         // stage('Run Security Scans on Docker Images') {
         //     steps {
         //         sh '''
@@ -254,17 +254,17 @@ pipeline {
         //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
         //     }
         // }
-        // stage('Push Docker Images') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-        //             sh '''
-        //             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-        //             docker push mecit35/mern-project-frontend:latest
-        //             docker push mecit35/mern-project-backend:latest
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Push Docker Images') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push mecit35/mern-project-frontend:latest
+                    docker push mecit35/mern-project-backend:latest
+                    '''
+                }
+            }
+        }
 
 
 
