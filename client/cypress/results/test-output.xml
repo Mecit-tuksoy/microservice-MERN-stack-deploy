@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="6.4510000000000005" tests="2" failures="2">
+  <testsuite name="Root Suite" timestamp="2024-11-29T07:37:52" tests="0" file="cypress/integration/endToEnd.spec.js" failures="0" time="0">
+  </testsuite>
+  <testsuite name="Web site availability" timestamp="2024-11-29T07:37:52" tests="2" failures="2" time="6.4510000000000005">
+    <testcase name="Web site availability Sanity listings web site" time="1.166" classname="Sanity listings web site">
+    </testcase>
+    <testcase name="Web site availability Test Adding Employee listings" time="0" classname="Test Adding Employee listings">
+      <failure message="Timed out retrying: Expected to find content: &apos;Employee1&apos; but never did." type="AssertionError"><![CDATA[AssertionError: Timed out retrying: Expected to find content: 'Employee1' but never did.
+    at Context.eval (http://localhost:3000/__cypress/tests?p=cypress/integration/endToEnd.spec.js:17:34)]]></failure>
+    </testcase>
+    <testcase name="Web site availability &quot;after all&quot; hook for &quot;Test Adding Employee listings&quot;" time="5.285" classname="&quot;after all&quot; hook for &quot;Test Adding Employee listings&quot;">
+      <failure message="`cy.click()` failed because it requires a DOM element.
+
+The subject received was:
+
+  &gt; `undefined`
+
+The previous command that ran was:
+
+  &gt; `cy.contains()`
+
+Because this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `Web site availability`" type="CypressError"><![CDATA[CypressError: `cy.click()` failed because it requires a DOM element.
+
+The subject received was:
+
+  > `undefined`
+
+The previous command that ran was:
+
+  > `cy.contains()`
+
+Because this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `Web site availability`
+    at ensureElement (http://localhost:3000/__cypress/runner/cypress_runner.js:160256:24)
+    at validateType (http://localhost:3000/__cypress/runner/cypress_runner.js:160080:16)
+    at Object.ensureSubjectByType (http://localhost:3000/__cypress/runner/cypress_runner.js:160122:11)
+    at pushSubjectAndValidate (http://localhost:3000/__cypress/runner/cypress_runner.js:167841:15)
+    at Context.<anonymous> (http://localhost:3000/__cypress/runner/cypress_runner.js:168169:18)
+From Your Spec Code:
+    at Context.eval (http://localhost:3000/__cypress/tests?p=cypress/integration/endToEnd.spec.js:4:31)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

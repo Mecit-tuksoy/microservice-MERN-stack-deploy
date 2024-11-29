@@ -15,6 +15,7 @@ client/cypress/integration/endToEnd.spec.js  >> localhost:3000   >>>3 yerde var
 server/db/conn.msj >>> localhost:27017  
 server/.env-example  >>> bu dosyada "ATLAS_URI=" var buraya mongodbnin url gelecek  >>>
 örnek: ATLAS_URI=mongodb://admin:secret@mongodb:27017/sample_training?authSource=admin
+client/cypress.json da "baseUrl": "http://localhost:3000" kısmını unutma 
 
 
 # mongodb container çalıştır
@@ -77,14 +78,14 @@ Yeni bir kayıt eklemek:
 ````sh
 curl -X POST -H "Content-Type: application/json" \
 -d '{"name": "Mecit", "position": "DevOps", "level": "Middle"}' \
-http://backend-service:5050/record     
+http://backend:5050/record     
 ````  
->>> minikubede yanıt geldi
+>>> >>>docker-compose ile bu çalışıyor
 
 
 # Kayıtları listelemek:
 
-curl http://localhost:5050/record
+curl http://backend:5050/record    >>>docker-compose ile bu çalışıyor
 
 
 # kubeconfig:

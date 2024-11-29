@@ -1,33 +1,20 @@
-# Node.js 18 sürümünü temel al
+# 1. Base image olarak resmi Node.js imajını kullan
 FROM node:18
 
-# Çalışma dizinini ayarla
+# 2. Çalışma dizinini ayarla
 WORKDIR /usr/src/app
 
-# package.json ve package-lock.json dosyalarını kopyala
+# 3. package.json ve package-lock.json dosyalarını kopyala
 COPY package*.json ./
 
-# Bağımlılıkları yükle
+# 4. Bağımlılıkları yükle
 RUN npm install
 
-# Cypress'in çalışması için gerekli olan bağımlılıkları yükle
-RUN apt-get update && apt-get install -y libgtk2.0-0 --no-install-recommends 
-RUN apt-get install -y libgtk-3-0 --no-install-recommends 
-RUN apt-get install -y libgbm-dev --no-install-recommends 
-RUN apt-get install -y libnotify-dev --no-install-recommends 
-RUN apt-get install -y libgconf-2-4 --no-install-recommends 
-RUN apt-get install -y libnss3 --no-install-recommends 
-RUN apt-get install -y libxss1 --no-install-recommends 
-RUN apt-get install -y libasound2 --no-install-recommends 
-RUN apt-get install -y libxtst6 --no-install-recommends 
-RUN apt-get install -y libxcomposite1 --no-install-recommends 
-RUN apt-get install -y xvfb --no-install-recommends 
-
-# Projenin geri kalanını kopyala
+# 5. Uygulama dosyalarını kopyala
 COPY . .
 
-# Uygulama için gerekli portu aç
+# 6. Uygulamanın çalışacağı portu belirle
 EXPOSE 3000
 
-# Uygulama başlatma komutu
+# 7. Uygulamayı başlat
 CMD ["npm", "start"]

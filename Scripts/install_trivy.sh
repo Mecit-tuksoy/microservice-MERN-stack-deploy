@@ -13,3 +13,4 @@ sudo apt-get update
 
 # Install Trivy from the configured repository.
 sudo apt-get install trivy -y
+trivy --version || echo "Trivy kurulumu başarısız oldu. Lütfen tekrar kontrol edin."
