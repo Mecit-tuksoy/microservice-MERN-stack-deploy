@@ -323,13 +323,18 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Cypress testlerini çalıştırma
-                    sh 'cd client && npx cypress run --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml'
-                    
-                    // XML raporunu belirtilen dosya adına dönüştür
-                    sh 'cat cypress/results/test-output.xml > cypress/results/${TEST_RESULT_LOG_FILE}'
-                    
-                    // Eğer eklemek istediğiniz başka işlemler varsa, buraya yazabilirsiniz.
+                    // Cypress testlerini çalıştırırken gerekli terminal değişkenini ayarla
+                    sh '''
+                        export TERM=xterm
+                        cd client
+                        npx cypress run --browser chrome --headless --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
+                    '''
+                
+                    sh '''
+                        cd client/cypress/results
+                        mv test-output.xml ${TEST_RESULT_LOG_FILE}
+                    '''
+                
                 }
             }
         }
