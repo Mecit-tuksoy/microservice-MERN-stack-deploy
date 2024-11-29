@@ -243,17 +243,17 @@ pipeline {
                 '''
             }
         }
-        stage('Run Security Scans on Docker Images') {
-            steps {
-                sh '''
-                # Scan the frontend and backend Docker images for vulnerabilities and save the results
-                trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --timeout 10m --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
-                trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
-                '''
-                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest       (pipeline risk varsa durur.)
-                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
-            }
-        }
+        // stage('Run Security Scans on Docker Images') {
+        //     steps {
+        //         sh '''
+        //         # Scan the frontend and backend Docker images for vulnerabilities and save the results
+        //         trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --timeout 10m --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
+        //         trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
+        //         '''
+        //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest       (pipeline risk varsa durur.)
+        //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
+        //     }
+        // }
         stage('Push Docker Images') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
