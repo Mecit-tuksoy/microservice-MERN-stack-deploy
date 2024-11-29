@@ -292,8 +292,6 @@ pipeline {
             }
         }
     
-
-    stages {
         stage('Install Node.js and npm') {
             steps {
                 script {
