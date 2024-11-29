@@ -333,6 +333,7 @@ pipeline {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sh '''
+                        export TERM=xterm
                         cd client
                         npx cypress run --reporter json > ${TEST_RESULT_LOG_FILE}
                         mv ${TEST_RESULT_LOG_FILE} $WORKSPACE    
