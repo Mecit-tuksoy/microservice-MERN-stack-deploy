@@ -319,13 +319,17 @@ pipeline {
                 }
             }
         }
+        
         stage('Test') {
             steps {
                 script {
                     // Cypress testlerini çalıştırma
                     sh 'cd client && npx cypress run --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml'
-                    // XML raporunu TXT dosyasına dönüştür
+                    
+                    // XML raporunu belirtilen dosya adına dönüştür
                     sh 'cat cypress/results/test-output.xml > cypress/results/${TEST_RESULT_LOG_FILE}'
+                    
+                    // Eğer eklemek istediğiniz başka işlemler varsa, buraya yazabilirsiniz.
                 }
             }
         }
