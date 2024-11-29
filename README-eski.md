@@ -78,14 +78,14 @@ Yeni bir kayıt eklemek:
 ````sh
 curl -X POST -H "Content-Type: application/json" \
 -d '{"name": "Mecit", "position": "DevOps", "level": "Middle"}' \
-http://backend:5050/record     
+http://backend-service:5050/record     
 ````  
 >>> >>>docker-compose ile bu çalışıyor
 
 
 # Kayıtları listelemek:
 
-curl http://backend:5050/record    >>>docker-compose ile bu çalışıyor
+curl http://backend-service:5050/record    >>>docker-compose ile bu çalışıyor
 
 
 # kubeconfig:

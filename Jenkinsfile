@@ -285,7 +285,7 @@ pipeline {
                     // İlk IP'yi kullanmak istiyorsanız:
                     def workerNodeIP = publicIPs[0]                    
                     sh """
-                    curl -X POST http://${workerNodeIP}:30001/record   -H "Content-Type: application/json" -d '{"name": "mecit", "position": "DevOps", "level": "Middle"}' >> ${POST_GET_RESULT_FILE}
+                    curl -X POST http://${workerNodeIP}:30002/records   -H "Content-Type: application/json" -d '{"name": "mecit", "position": "DevOps", "level": "Middle"}' >> ${POST_GET_RESULT_FILE}
                     curl http://${workerNodeIP}:30002 >> ${POST_GET_RESULT_FILE}
                     """
                 }
