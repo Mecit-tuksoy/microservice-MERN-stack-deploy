@@ -213,18 +213,10 @@ jenkinse email bilgilerimizi "global credentials" olarak  girmemiz gerekiyor.
 ![alt text](<email-sisteme girme-3.png>)
 
 
-### jenkins server'da aws hesabımıza erişebilmek için jenkins kullanıcısına geçip "aws configure" yapıyoruz:
+### jenkins server'da aws hesabımıza erişebilmek için jenkins'e "aws credentials" bilgilerini girmeliyiz:
 
-````sh
-sudo su - jenkins
-aws configure
-  AWS Access Key ID [None]:
-  AWS Secret Access Key [None]:
-  Default region name [None]:
-  Default output format [None]:
-````
+![alt text](aws-cred-1.png)
 
-![alt text](<aws configure-1.png>)
 
 ### jenkins'in dockerhub'a image push edebilmesi için jenkins'e "docker credentials" bilgilerini girmeliyiz:
 

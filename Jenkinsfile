@@ -88,32 +88,40 @@ pipeline {
                 dir("${K8S_DIR}") {
                     script {
                         // EKS Cluster durumu kontrol et
-                        def eksStatus = sh(
-                            script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
-                            returnStdout: true
-                        ).trim()
-                        
+                        def eksStatus = ''
+                        try {
+                            eksStatus = sh(
+                                script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
+                                returnStdout: true
+                            ).trim()
+                        } catch (Exception e) {
+                            // Eğer cluster mevcut değilse, hata alacağız ve eksStatus boş kalacak
+                            echo "EKS Cluster '${EKS_CLUSTER_NAME}' bulunamadı. Terraform ile oluşturulacak."
+                        }
+
+                        // Eğer cluster mevcut ve aktifse
                         if (eksStatus == "ACTIVE") {
-                            echo "EKS Cluster already active. Skipping Terraform apply step."
+                            echo "EKS Cluster '${EKS_CLUSTER_NAME}' zaten aktif. Terraform apply işlemi atlanıyor."
                         } else {
-                            echo "EKS Cluster is not active. Running Terraform apply step."
+                            echo "EKS Cluster '${EKS_CLUSTER_NAME}' mevcut değil ya da aktif değil. Terraform apply işlemi başlatılıyor."
 
                             // Terraform init komutunu çalıştır
                             def initResult = sh(script: 'terraform init', returnStatus: true)
                             if (initResult != 0) {
-                                echo 'Terraform init failed, continuing...'
+                                error 'Terraform init başarısız oldu, pipeline devam etmiyor.'
                             }
 
                             // Terraform apply komutunu çalıştır
                             def applyResult = sh(script: 'terraform apply -auto-approve', returnStatus: true)
                             if (applyResult != 0) {
-                                echo 'Terraform apply failed, continuing...'
+                                error 'Terraform apply başarısız oldu, pipeline devam etmiyor.'
                             }
                         }
                     }
                 }
             }
         }
+
 
 
         stage('Check EKS Cluster Status') {
