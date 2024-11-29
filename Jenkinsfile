@@ -213,7 +213,7 @@ pipeline {
                         "${FRONTEND_DIR}/src/components/edit.js",
                         "${FRONTEND_DIR}/src/components/healthcheck.js",
                         "${FRONTEND_DIR}/src/components/recordList.js",
-                        "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js"
+                        "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
                         "${FRONTEND_DIR}/cypress.json"
                     ]
 
