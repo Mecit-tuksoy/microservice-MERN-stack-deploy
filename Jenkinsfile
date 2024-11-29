@@ -247,8 +247,8 @@ pipeline {
             steps {
                 sh '''
                 # Scan the frontend and backend Docker images for vulnerabilities and save the results
-                trivy image --severity HIGH,CRITICAL --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
-                trivy image --severity HIGH,CRITICAL --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
+                trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
+                trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
                 '''
                 // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest       (pipeline risk varsa durur.)
                 // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
