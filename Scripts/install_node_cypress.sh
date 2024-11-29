@@ -12,6 +12,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
+# Jenkins için PATH'e ekleme
+echo "PATH değişkenine NVM ve Node.js yolları ekleniyor..."
+export PATH="$NVM_DIR/versions/node/$(nvm version | cut -d 'v' -f2)/bin:$PATH"
+
 # Node.js'i yükle
 echo "En son Node.js sürümü yükleniyor..."
 nvm install node

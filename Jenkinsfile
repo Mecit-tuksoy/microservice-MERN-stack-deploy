@@ -296,8 +296,18 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    // Frontend dizinine gidip bağımlılıkları yükleyin
-                    sh 'cd client && npm install'
+                    // Node.js'i ve npm'i doğru şekilde kullanabilmek için PATH'i güncelle
+                    sh '''
+                    # Node.js'in doğru sürümünün PATH'e eklendiğinden emin ol
+                    export PATH="/home/mecit/.nvm/versions/node/v23.3.0/bin:$PATH"
+
+                    # Node.js ve npm sürümlerini kontrol et
+                    echo "Node.js Sürümü: $(node -v)"
+                    echo "npm Sürümü: $(npm -v)"
+
+                    # client dizinine gidip bağımlılıkları yükle
+                    cd client && npm install
+                    '''
                 }
             }
         }
