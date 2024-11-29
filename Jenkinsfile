@@ -144,105 +144,105 @@ pipeline {
             }
         }
 
-        stage('Deploy Metrics Server and Node Exporter') {
-            steps {
-                script {
-                    sh '''#!/bin/bash
-                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
+        // stage('Deploy Metrics Server and Node Exporter') {
+        //     steps {
+        //         script {
+        //             sh '''#!/bin/bash
+        //             aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
                     
-                    # Metrics Server yükle
-                    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        //             # Metrics Server yükle
+        //             kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
                     
-                    # Helm deposu ekle
-                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                    helm repo update
+        //             # Helm deposu ekle
+        //             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        //             helm repo update
                     
-                    # Var olan node-exporter release'ini sil
-                    helm uninstall node-exporter --namespace kube-system || true
+        //             # Var olan node-exporter release'ini sil
+        //             helm uninstall node-exporter --namespace kube-system || true
                     
-                    # Node Exporter yükle
-                    helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
-                    '''
-                }
-            }
-        }
+        //             # Node Exporter yükle
+        //             helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
+        //             '''
+        //         }
+        //     }
+        // }
 
-        stage('Retrieve Node Public IP for Prometheus') {
-            steps {
-                script {
-                    def publicIPs = sh(
-                        script: "kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'",
-                        returnStdout: true
-                    ).trim().split(" ")
-                    writeFile file: 'public_ips.txt', text: publicIPs.join("\n")
-                    echo "Node Public IPs: ${publicIPs}"
-                }
-            }
-        }
-        stage('Update Prometheus Configuration') {
-            steps {
-                script {
-                    def publicIP = readFile('public_ips.txt').trim() // Dosyadan IP adresini oku ve boşlukları temizle
-                    def prometheusTarget = "${publicIP}:9100" // Hedef IP ve port
-                    def configFilePath = '/etc/prometheus/prometheus.yml'
+        // stage('Retrieve Node Public IP for Prometheus') {
+        //     steps {
+        //         script {
+        //             def publicIPs = sh(
+        //                 script: "kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'",
+        //                 returnStdout: true
+        //             ).trim().split(" ")
+        //             writeFile file: 'public_ips.txt', text: publicIPs.join("\n")
+        //             echo "Node Public IPs: ${publicIPs}"
+        //         }
+        //     }
+        // }
+        // stage('Update Prometheus Configuration') {
+        //     steps {
+        //         script {
+        //             def publicIP = readFile('public_ips.txt').trim() // Dosyadan IP adresini oku ve boşlukları temizle
+        //             def prometheusTarget = "${publicIP}:9100" // Hedef IP ve port
+        //             def configFilePath = '/etc/prometheus/prometheus.yml'
 
-                    // Konfigürasyon dosyasını oku
-                    def configFile = readFile(configFilePath)
+        //             // Konfigürasyon dosyasını oku
+        //             def configFile = readFile(configFilePath)
 
-                    // "eks" job'ının ve hedef IP'nin konfigürasyon dosyasına zaten eklenip eklenmediğini kontrol et
-                    if (!configFile.contains("job_name: eks") || !configFile.contains(prometheusTarget)) {
-                        // Eğer eklenmemişse, ekleyelim
-                        sh """
-                            echo "  - job_name: eks" | sudo tee -a ${configFilePath}
-                            echo "    static_configs:" | sudo tee -a ${configFilePath}
-                            echo "      - targets: ['${prometheusTarget}']" | sudo tee -a ${configFilePath}
+        //             // "eks" job'ının ve hedef IP'nin konfigürasyon dosyasına zaten eklenip eklenmediğini kontrol et
+        //             if (!configFile.contains("job_name: eks") || !configFile.contains(prometheusTarget)) {
+        //                 // Eğer eklenmemişse, ekleyelim
+        //                 sh """
+        //                     echo "  - job_name: eks" | sudo tee -a ${configFilePath}
+        //                     echo "    static_configs:" | sudo tee -a ${configFilePath}
+        //                     echo "      - targets: ['${prometheusTarget}']" | sudo tee -a ${configFilePath}
 
-                            sudo systemctl restart prometheus
-                        """
-                    } else {
-                        echo "Prometheus job already exists, no need to add it again."
-                    }
-                }
-            }
-        }
+        //                     sudo systemctl restart prometheus
+        //                 """
+        //             } else {
+        //                 echo "Prometheus job already exists, no need to add it again."
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Update Configuration Files') {
-            steps {
-                script {
-                    // Daha önce kaydedilen public IP adreslerini oku
-                    def publicIPs = readFile('public_ips.txt').trim().split("\n")
+        // stage('Update Configuration Files') {
+        //     steps {
+        //         script {
+        //             // Daha önce kaydedilen public IP adreslerini oku
+        //             def publicIPs = readFile('public_ips.txt').trim().split("\n")
                     
-                    // İlk IP'yi kullanmak istiyorsanız:
-                    def workerNodeIP = publicIPs[0]
+        //             // İlk IP'yi kullanmak istiyorsanız:
+        //             def workerNodeIP = publicIPs[0]
 
-                    // Değişiklik yapılacak dosyaların listesi
-                    def filesToUpdate = [
-                        "${FRONTEND_DIR}/src/components/create.js",
-                        "${FRONTEND_DIR}/src/components/edit.js",
-                        "${FRONTEND_DIR}/src/components/healthcheck.js",
-                        "${FRONTEND_DIR}/src/components/recordList.js",
-                        "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
-                        "${FRONTEND_DIR}/cypress.json"
-                    ]
+        //             // Değişiklik yapılacak dosyaların listesi
+        //             def filesToUpdate = [
+        //                 "${FRONTEND_DIR}/src/components/create.js",
+        //                 "${FRONTEND_DIR}/src/components/edit.js",
+        //                 "${FRONTEND_DIR}/src/components/healthcheck.js",
+        //                 "${FRONTEND_DIR}/src/components/recordList.js",
+        //                 "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
+        //                 "${FRONTEND_DIR}/cypress.json"
+        //             ]
 
-                    // Her dosyada <worker-node-public-ip> ifadesini değiştir
-                    filesToUpdate.each { file ->
-                        sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
-                    }
-                }
-            }
-        }
+        //             // Her dosyada <worker-node-public-ip> ifadesini değiştir
+        //             filesToUpdate.each { file ->
+        //                 sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
+        //             }
+        //         }
+        //     }
+        // }
 
      
-        stage('Tag, Build, and Test Application') {
-            steps {
-                sh '''
-                # Build and tag Docker images
-                docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
-                docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
-                '''
-            }
-        }
+        // stage('Tag, Build, and Test Application') {
+        //     steps {
+        //         sh '''
+        //         # Build and tag Docker images
+        //         docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
+        //         docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
+        //         '''
+        //     }
+        // }
         // stage('Run Security Scans on Docker Images') {
         //     steps {
         //         sh '''
@@ -254,17 +254,17 @@ pipeline {
         //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
         //     }
         // }
-        stage('Push Docker Images') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push mecit35/mern-project-frontend:latest
-                    docker push mecit35/mern-project-backend:latest
-                    '''
-                }
-            }
-        }
+        // stage('Push Docker Images') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        //             sh '''
+        //             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+        //             docker push mecit35/mern-project-frontend:latest
+        //             docker push mecit35/mern-project-backend:latest
+        //             '''
+        //         }
+        //     }
+        // }
 
 
 
@@ -295,18 +295,26 @@ pipeline {
         stage('Install Node.js and npm') {
             steps {
                 script {
-                    // Node.js ve npm'i yükle
-                    sh '''
-                    # NodeSource Node.js binary dağıtım deposunu ekle
-                    curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+                    // Node.js ve npm yüklü mü kontrol et
+                    def nodeInstalled = sh(script: 'which node', returnStatus: true)
+                    def npmInstalled = sh(script: 'which npm', returnStatus: true)
                     
-                    # Node.js ve npm'i kur
-                    sudo apt-get install -y nodejs
-                    
-                    # Node.js ve npm sürümlerini kontrol et
-                    node -v
-                    npm -v
-                    '''
+                    if (nodeInstalled != 0 || npmInstalled != 0) {
+                        // Node.js ve npm yüklü değilse yükle
+                        sh '''
+                        # NodeSource Node.js binary dağıtım deposunu ekle
+                        curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+                        
+                        # Node.js ve npm'i kur
+                        sudo apt-get install -y nodejs
+                        
+                        # Node.js ve npm sürümlerini kontrol et
+                        node -v
+                        npm -v
+                        '''
+                    } else {
+                        echo "Node.js ve npm zaten yüklü."
+                    }
                 }
             }
         }
@@ -327,8 +335,10 @@ pipeline {
                     sh '''
                         export TERM=xterm
                         cd client
-                        npx cypress run --browser chrome --headless --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
+                        npx cypress run --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
+                        
                     '''
+                    // npx cypress run --browser chrome --headless --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
                 
                     sh '''
                         cd client/cypress/results
