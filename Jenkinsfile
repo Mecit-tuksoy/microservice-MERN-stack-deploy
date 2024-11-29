@@ -33,9 +33,9 @@ pipeline {
             steps {
                 sh '''
                 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/scripts/install.sh | sh
-                trivy fs --severity HIGH,CRITICAL . > ${TEST_RESULT_FILE}  
+                trivy fs --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE} 
                 '''
-                // trivy fs --exit-code 1 --severity HIGH,CRITICAL . > ${TEST_RESULT_FILE}   (pipeline risk varsa durur.)
+                // trivy fs --exit-code 1 --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE}   (pipeline risk varsa durur.)
             }
         }
         stage('Check Security Scan Results') {
