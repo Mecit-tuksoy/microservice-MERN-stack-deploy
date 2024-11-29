@@ -293,21 +293,31 @@ pipeline {
         }
     
 
+    stages {
+        stage('Install Node.js and npm') {
+            steps {
+                script {
+                    // Node.js ve npm'i yükle
+                    sh '''
+                    # NodeSource Node.js binary dağıtım deposunu ekle
+                    curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+                    
+                    # Node.js ve npm'i kur
+                    sudo apt-get install -y nodejs
+                    
+                    # Node.js ve npm sürümlerini kontrol et
+                    node -v
+                    npm -v
+                    '''
+                }
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 script {
-                    // Node.js'i ve npm'i doğru şekilde kullanabilmek için PATH'i güncelle
-                    sh '''
-                    # Node.js'in doğru sürümünün PATH'e eklendiğinden emin ol
-                    export PATH="/home/mecit/.nvm/versions/node/v23.3.0/bin:$PATH"
-
-                    # Node.js ve npm sürümlerini kontrol et
-                    echo "Node.js Sürümü: $(node -v)"
-                    echo "npm Sürümü: $(npm -v)"
-
-                    # client dizinine gidip bağımlılıkları yükle
-                    cd client && npm install
-                    '''
+                    // Bağımlılıkları yükle
+                    sh 'cd client && npm install'
                 }
             }
         }
