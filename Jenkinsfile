@@ -234,15 +234,15 @@ pipeline {
         }
 
      
-        stage('Tag and Build  Application') {
-            steps {
-                sh '''
-                # Build and tag Docker images
-                docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
-                docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
-                '''
-            }
-        }
+        // stage('Tag and Build  Application') {
+        //     steps {
+        //         sh '''
+        //         # Build and tag Docker images
+        //         docker build -t mecit35/mern-project-frontend:latest ${FRONTEND_DIR} > ${BUILD_LOG_FILE}
+        //         docker build -t mecit35/mern-project-backend:latest ${BACKEND_DIR} >> ${BUILD_LOG_FILE}
+        //         '''
+        //     }
+        // }
         // stage('Run Security Scans on Docker Images') {
         //     steps {
         //         sh '''
@@ -254,17 +254,17 @@ pipeline {
         //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
         //     }
         // }
-        stage('Push Docker Images') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push mecit35/mern-project-frontend:latest
-                    docker push mecit35/mern-project-backend:latest
-                    '''
-                }
-            }
-        }
+        // stage('Push Docker Images') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        //             sh '''
+        //             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+        //             docker push mecit35/mern-project-frontend:latest
+        //             docker push mecit35/mern-project-backend:latest
+        //             '''
+        //         }
+        //     }
+        // }
 
 
 
@@ -335,15 +335,15 @@ pipeline {
                     sh '''
                         export TERM=xterm
                         cd client
-                        npx cypress run --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
-                        
+                        npx cypress run --reporter json > ${TEST_RESULT_LOG_FILE}
+                                   
                     '''
                     // npx cypress run --browser chrome --headless --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
-                
-                    sh '''
-                        cd client/cypress/results
-                        mv test-output.xml ${TEST_RESULT_LOG_FILE}
-                    '''
+                        // npx cypress run --reporter junit --reporter-options mochaFile=cypress/results/test-output.xml
+                    // sh '''
+                    //     cd client/cypress/results
+                    //     mv test-output.xml ${TEST_RESULT_LOG_FILE}
+                    // '''
                 
                 }
             }
