@@ -283,7 +283,7 @@ pipeline {
                 }
             }
         }
-    }
+    
 
         stage('Install Dependencies') {
             steps {
@@ -316,6 +316,7 @@ pipeline {
             to: 'mecit.tuksoy@gmail.com',
             attachmentsPattern: "${TEST_RESULT_FILE},${POST_GET_RESULT_FILE},${BUILD_LOG_FILE},${TEST_RESULT_LOG_FILE},${IMAGE_TEST_RESULT_FILE}"
         }
+    }
     }
 }
        
