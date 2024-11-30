@@ -34,9 +34,8 @@ metadata:
 spec:
   selector:
     name: backend
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 5050
       targetPort: 5050
-      nodePort: 30001
   

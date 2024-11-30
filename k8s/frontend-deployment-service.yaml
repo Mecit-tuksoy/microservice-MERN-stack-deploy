@@ -32,9 +32,8 @@ metadata:
 spec:
   selector:
     name: frontend
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 3000
       targetPort: 3000
-      nodePort: 30002
   
