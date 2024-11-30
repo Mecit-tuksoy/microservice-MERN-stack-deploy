@@ -206,7 +206,8 @@ resource "aws_security_group" "eks_cluster_sg" {
   }
 
   depends_on = [
-    aws_vpc.eks_vpc
+    aws_vpc.eks_vpc,
+    aws_security_group.eks_cluster_sg
   ]
   
   tags = {
