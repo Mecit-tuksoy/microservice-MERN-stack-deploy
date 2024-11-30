@@ -123,27 +123,6 @@ pipeline {
         }
 
 
-
-        stage('Check EKS Cluster Status') {
-            steps {
-                script {
-                    def eksStatus = sh(
-                        script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
-                        returnStdout: true
-                    ).trim()
-                    
-                    while (eksStatus != "ACTIVE") {
-                        echo "EKS Cluster is not active yet, waiting..."
-                        eksStatus = sh(
-                            script: "aws eks describe-cluster --name ${EKS_CLUSTER_NAME} --region ${AWS_REGION} --query 'cluster.status' --output text",
-                            returnStdout: true
-                        ).trim()
-                    }
-                    echo "EKS Cluster is active!"
-                }
-            }
-        }
-
         stage('Deploy Metrics Server and Node Exporter') {
             steps {
                 script {
@@ -162,20 +141,28 @@ pipeline {
                     
                     # Node Exporter yükle
                     helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
+
+                    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
                     '''
                 }
             }
         }
 
-        stage('Retrieve Node Public IP for Prometheus') {
+        stage('Wait for LoadBalancer Hostname') {
             steps {
-                script {
-                    def publicIPs = sh(
-                        script: "kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'",
-                        returnStdout: true
-                    ).trim().split(" ")
-                    writeFile file: 'public_ips.txt', text: publicIPs.join("\n")
-                    echo "Node Public IPs: ${publicIPs}"
+                retry(5) { // 5 kez denemek için
+                    script {
+                        sleep(30) // 30 saniye bekle
+                        def hostname = sh(
+                            script: "kubectl get ingress microservices-ingress -n default -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'",
+                            returnStdout: true
+                        ).trim()
+                        if (hostname == "") {
+                            error("LoadBalancer hostname is not ready yet")
+                        }
+                        writeFile file: 'public_ips.txt', text: hostname
+                        echo "LoadBalancer Hostname: ${hostname}"
+                    }
                 }
             }
         }
