@@ -18,3 +18,10 @@ spec:
                 name: frontend-service
                 port:
                   number: 3000
+          - path: "/result"
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 5050
