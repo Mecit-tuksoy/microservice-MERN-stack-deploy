@@ -148,21 +148,15 @@ pipeline {
             }
         }
 
-        stage('Wait for LoadBalancer Hostname') {
+        stage('Public IP') {
             steps {
-                retry(5) { // 5 kez denemek için
-                    script {
-                        sleep(30) // 30 saniye bekle
-                        def hostname = sh(
-                            script: "kubectl get ingress microservices-ingress -n default -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'",
-                            returnStdout: true
-                        ).trim()
-                        if (hostname == "") {
-                            error("LoadBalancer hostname is not ready yet")
-                        }
-                        writeFile file: 'public_ips.txt', text: hostname
-                        echo "LoadBalancer Hostname: ${hostname}"
-                    }
+                script {
+                    def publicIPs = sh(
+                        script: "kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"ExternalIP\")].address}'",
+                        returnStdout: true
+                    ).trim().split(" ")
+                    writeFile file: 'public_ips.txt', text: publicIPs.join("\n")
+                    echo "Node Public IPs: ${publicIPs}"
                 }
             }
         }
@@ -196,13 +190,9 @@ pipeline {
         stage('Update Configuration Files') {
             steps {
                 script {
-                    // Daha önce kaydedilen public IP adreslerini oku
-                    def publicIPs = readFile('public_ips.txt').trim().split("\n")
                     
-                    // İlk IP'yi kullanmak istiyorsanız:
+                    def publicIPs = readFile('public_ips.txt').trim().split("\n")                    
                     def workerNodeIP = publicIPs[0]
-
-                    // Değişiklik yapılacak dosyaların listesi
                     def filesToUpdate = [
                         "${FRONTEND_DIR}/src/components/create.js",
                         "${FRONTEND_DIR}/src/components/edit.js",
@@ -211,8 +201,6 @@ pipeline {
                         "${FRONTEND_DIR}/cypress/integration/endToEnd.spec.js",
                         "${FRONTEND_DIR}/cypress.json"
                     ]
-
-                    // Her dosyada localhost ifadesini değiştir
                     filesToUpdate.each { file ->
                         sh "sed -i 's|localhost|${workerNodeIP}|g' ${file}"
                     }
@@ -237,8 +225,8 @@ pipeline {
                 trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --timeout 10m --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
                 trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
                 '''
-                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest       (pipeline risk varsa durur.)
-                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest         (pipeline risk varsa durur.)
+                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest      // (pipeline risk varsa durur. bu aşamada yapmadım)
+                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest       //  (pipeline risk varsa durur. bu aşamada yapmadım)
             }
         }
         stage('Push Docker Images') {
@@ -318,14 +306,11 @@ pipeline {
         stage('Test Application Deployment') {
             steps {
                 script {
-                    // Daha önce kaydedilen public IP adreslerini oku
-                    def publicIPs = readFile('public_ips.txt').trim().split("\n")
-                    
-                    // İlk IP'yi kullanmak istiyorsanız:
+                    def publicIPs = readFile('public_ips.txt').trim().split("\n")                    
                     def workerNodeIP = publicIPs[0]                    
                     sh """
-                    curl -X POST http://${workerNodeIP}/records   -H "Content-Type: application/json" -d '{"name": "mecit", "position": "DevOps", "level": "Middle"}' >> ${POST_GET_RESULT_FILE}
-                    curl http://${workerNodeIP} >> ${POST_GET_RESULT_FILE}
+                    curl -X POST http://${workerNodeIP}:30002/record   -H "Content-Type: application/json" -d '{"name": "mecit", "position": "DevOps", "level": "Middle"}' >> ${POST_GET_RESULT_FILE}
+                    curl http://${workerNodeIP}:30001 >> ${POST_GET_RESULT_FILE}
                     """
                 }
             }

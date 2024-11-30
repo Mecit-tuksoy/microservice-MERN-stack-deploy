@@ -11,7 +11,7 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-    }
+    }   
   }
 }
 
@@ -19,169 +19,20 @@ provider "aws" {
   region = "us-east-1"
 }
 
-
-# VPC Configuration
-resource "aws_vpc" "eks_vpc" {
-  cidr_block           = "172.20.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
-  tags = {
-    Name = "eks-vpc"
-  }
+data "aws_vpc" "default" {
+  default = true
 }
 
-# Public Subnet
-resource "aws_subnet" "public_eks_subnet" {
-  count 	    = 2
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = element(["172.20.1.0/24", "172.20.2.0/24"], count.index)
-  availability_zone = element(["us-east-1a", "us-east-1b"], count.index)  
-  map_public_ip_on_launch = true
-  tags = {
-    "Name" = "eks-public-subnet-${count.index}"
-    "kubernetes.io/role/elb" = "1"
-  }
-  depends_on = [
-    aws_vpc.eks_vpc
-  ]
-}
-
-
-# Private Subnet
-resource "aws_subnet" "private_eks_subnet" {
-  count             = 2
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = element(["172.20.3.0/24", "172.20.4.0/24"], count.index)
-  availability_zone = element(["us-east-1a", "us-east-1b"], count.index)
-  map_public_ip_on_launch = false
-  tags = {
-    "Name" = "eks-private-subnet-${count.index}"
-    "kubernetes.io/cluster/${var.eks_cluster_name}" = "owned"
-    "kubernetes.io/role/internal-elb" = "1"
-  }
-
-  depends_on = [
-    aws_vpc.eks_vpc
-  ]
-}
 
 variable "eks_cluster_name" {
   default = "my-eks-cluster"
 }
 
-# Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.eks_vpc.id
-
-  tags = {
-    Name = "my-eks-cluster-igw"
-  }
-  depends_on = [
-    aws_vpc.eks_vpc
-  ]
-}
-
-# Elastic IP for NAT Gateway
-resource "aws_eip" "nat_eip" {
-  domain = "vpc"
-
-  tags = {
-    Name = "eks-nat-eip"
-  }
-}
-
-# NAT Gateway
-resource "aws_nat_gateway" "nat_gw" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public_eks_subnet[0].id
-
-  tags = {
-    Name = "eks-nat-gateway"
-  }
-  depends_on = [
-    aws_eip.nat_eip,
-    aws_subnet.public_eks_subnet,
-    aws_vpc.eks_vpc
-  ]
-}
-
-# Public Route Table
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.eks_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "eks-public-route-table"
-  }
-
-  depends_on = [
-    aws_internet_gateway.igw,
-    aws_vpc.eks_vpc
-  ]
-}
-
-# Public Route Table Association
-resource "aws_route_table_association" "public" {
-  count          = 2
-  subnet_id      = element(aws_subnet.public_eks_subnet[*].id, count.index)
-  route_table_id = aws_route_table.public.id
-
-  depends_on = [
-    aws_internet_gateway.igw,
-    aws_route_table.public,
-    aws_subnet.public_eks_subnet,
-    aws_vpc.eks_vpc
-  ]
-}
-
-# Private Route Table
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.eks_vpc.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gw.id
-  }
-
-  tags = {
-    Name = "eks-private-route-table"
-  }
-
-  depends_on = [
-    aws_eip.nat_eip,
-    aws_nat_gateway.nat_gw,
-    aws_subnet.public_eks_subnet,
-    aws_vpc.eks_vpc
-  ]
-}
-
-# Private Route Table Association
-resource "aws_route_table_association" "private" {
-  count = 2  # İki özel subnet için association oluşturuyoruz
-  subnet_id      = aws_subnet.private_eks_subnet[count.index].id
-  route_table_id = aws_route_table.private.id
-
-  depends_on = [
-    aws_eip.nat_eip,
-    aws_nat_gateway.nat_gw,
-    aws_route_table.private,
-    aws_subnet.private_eks_subnet,
-    aws_subnet.public_eks_subnet,
-    aws_vpc.eks_vpc
-  ]
-}
-
 # Security Groups
-
 resource "aws_security_group" "eks_cluster_sg" {
   name        = "my-eks-cluster-eks-cluster-sg"
   description = "EKS cluster security group"
-  vpc_id      = aws_vpc.eks_vpc.id
+  vpc_id      = data.aws_vpc.default.id   #aws_vpc.eks_vpc.id
 
   ingress {
     from_port       = 0
@@ -204,11 +55,6 @@ resource "aws_security_group" "eks_cluster_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  depends_on = [
-    aws_vpc.eks_vpc,
-    aws_security_group.eks_cluster_sg
-  ]
   
   tags = {
     Name = "my-eks-cluster-eks-cluster-sg"
@@ -218,7 +64,7 @@ resource "aws_security_group" "eks_cluster_sg" {
 resource "aws_security_group" "eks_node_sg" {
   name        = "my-eks-cluster-eks-node-sg"
   description = "EKS worker node security group"
-  vpc_id      = aws_vpc.eks_vpc.id
+  vpc_id      = data.aws_vpc.default.id  
 
   ingress {
     from_port       = 0
@@ -265,10 +111,10 @@ resource "aws_security_group" "eks_node_sg" {
     Name = "my-eks-cluster-eks-node-sg"
   }
   depends_on = [
-    aws_vpc.eks_vpc,
     aws_security_group.eks_cluster_sg
   ]
 }
+
 
 # IAM Roles and Attachments
 resource "aws_iam_role" "eks_role" {
@@ -392,7 +238,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = aws_iam_role.eks_role.arn
 
   vpc_config {
-    subnet_ids         = aws_subnet.private_eks_subnet[*].id
+    subnet_ids         = ["subnet-04c001c3056ef26d1", "subnet-0a9dfb92318f8a2d7"] 
     security_group_ids = [aws_security_group.eks_cluster_sg.id]
     endpoint_private_access = true
     endpoint_public_access  = true
@@ -409,11 +255,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   depends_on = [
     aws_iam_role.eks_role,
     aws_iam_role_policy_attachment.eks_policy,
-    aws_security_group.eks_cluster_sg,
-    aws_subnet.private_eks_subnet,
-    aws_route_table.private,
-    aws_vpc.eks_vpc,
-    aws_nat_gateway.nat_gw
+    aws_security_group.eks_cluster_sg
   ]
 }
 
@@ -422,7 +264,7 @@ resource "aws_eks_node_group" "eks_node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "my-node-group"
   node_role_arn   = aws_iam_role.eks_node_group_role.arn
-  subnet_ids = aws_subnet.private_eks_subnet[*].id
+  subnet_ids = ["subnet-04c001c3056ef26d1", "subnet-0a9dfb92318f8a2d7"]   
   scaling_config {
     desired_size = 1
     max_size     = 2
@@ -442,16 +284,13 @@ resource "aws_eks_node_group" "eks_node_group" {
     aws_iam_role_policy_attachment.eks_elb_policy,
     aws_iam_role_policy_attachment.eks_policy,
     aws_iam_role_policy_attachment.eks_ecr_policy,
-    aws_eip.nat_eip,
     aws_iam_role.eks_role,
     aws_iam_role.eks_node_group_role,
-    aws_nat_gateway.nat_gw,
-    aws_security_group.eks_cluster_sg,
-    aws_subnet.private_eks_subnet,
-    aws_route_table.private,
-    aws_vpc.eks_vpc
+    aws_security_group.eks_cluster_sg
   ]
 }
+
+
 
 
 
@@ -542,4 +381,3 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
     aws_autoscaling_policy.scale_down
   ]
 }
-

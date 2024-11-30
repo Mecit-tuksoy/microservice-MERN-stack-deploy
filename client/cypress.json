@@ -5,6 +5,6 @@
   "supportFile": "cypress/support/index.js",
   "screenshotsFolder": "cypress/screenshots",
   "videosFolder": "cypress/videos",
-  "baseUrl": "http://localhost",
+  "baseUrl": "http://localhost:30001",
   "video": false
 }

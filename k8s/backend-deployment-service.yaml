@@ -21,7 +21,7 @@ spec:
             - secretRef:
                 name: mongo-secret
           imagePullPolicy: Always
-
+          
           resources:
             requests:
               cpu: "100m"
@@ -29,6 +29,7 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          
       restartPolicy: Always
 
 
@@ -42,8 +43,9 @@ metadata:
 spec:
   selector:
     name: backend
-  type: LoadBalancer
+  type: NodePort
   ports:
     - port: 5050
       targetPort: 5050
+      nodePort: 30002
   
