@@ -4,7 +4,7 @@ metadata:
   name: microservices-ingress
   namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    alb.ingress.kubernetes.io/scheme: internet-facing
 spec:
   ingressClassName: nginx
   rules:
