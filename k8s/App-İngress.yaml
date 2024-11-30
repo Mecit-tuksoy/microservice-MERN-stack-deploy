@@ -18,8 +18,25 @@ spec:
                 name: frontend-service
                 port:
                   number: 3000
-          - path: "/result"
+
+          - path: "/create(/|$)(.*)"
             pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 5050
+
+          - path: "/record(/|$)(.*)"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 5050
+
+          - path: "/healthcheck(/|$)(.*)"
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: backend-service
