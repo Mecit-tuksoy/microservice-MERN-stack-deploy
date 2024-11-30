@@ -181,7 +181,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "eks_cluster_sg" {
   name        = "my-eks-cluster-eks-cluster-sg"
   description = "EKS cluster security group"
-  vpc_id      = data.aws_vpc.default.id   #aws_vpc.eks_vpc.id
+  vpc_id      = aws_vpc.eks_vpc.id
 
   ingress {
     from_port       = 0
@@ -217,7 +217,7 @@ resource "aws_security_group" "eks_cluster_sg" {
 resource "aws_security_group" "eks_node_sg" {
   name        = "my-eks-cluster-eks-node-sg"
   description = "EKS worker node security group"
-  vpc_id      = data.aws_vpc.default.id  #aws_vpc.eks_vpc.id
+  vpc_id      = aws_vpc.eks_vpc.id
 
   ingress {
     from_port       = 0
