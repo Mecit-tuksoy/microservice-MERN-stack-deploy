@@ -230,19 +230,19 @@ resource "aws_security_group" "eks_node_sg" {
   ingress {
     from_port       = 30001
     to_port         = 30001
-    protocol        = "-1"
+    protocol        = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
     ingress {
     from_port       = 30002
     to_port         = 30002
-    protocol        = "-1"
+    protocol        = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
     ingress {
     from_port       = 9100
     to_port         = 9100
-    protocol        = "-1"
+    protocol        = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
