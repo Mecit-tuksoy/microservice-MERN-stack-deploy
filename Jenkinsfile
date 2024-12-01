@@ -13,46 +13,46 @@ pipeline {
         GIT_REPO = 'https://github.com/Mecit-tuksoy/microservice-MERN-stack-deploy.git'
         TEST_RESULT_FILE = 'file-test.txt'    
         BUILD_LOG_FILE = 'image-build-logs.txt'
-        TEST_RESULT_LOG_FILE = 'application-test-results.txt'
+        TEST_RESULT_LOG_FILE = 'app-test-results.txt'
         IMAGE_TEST_RESULT_FILE = 'test-image.txt'
         POST_GET_RESULT_FILE = 'POST-GET-test.txt'
     }
     
     stages {
-        // stage('Clean Workspace') {
-        //     steps {
-        //         cleanWs()
-        //     }
-        // }
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: "${env.GIT_REPO}"
             }
         }
-        // stage('Run Security Scans') {
-        //     steps {
-        //         sh '''
-        //         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/scripts/install.sh | sh
-        //         trivy fs --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE} 
-        //         '''
-        //         // trivy fs --exit-code 1 --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE}   (pipeline risk varsa durur.)
-        //     }
-        // }
-        // stage('Check Security Scan Results') {
-        //     steps {
-        //         script {
-        //             if (fileExists(env.TEST_RESULT_FILE)) {
-        //                 def scanResults = readFile(env.TEST_RESULT_FILE)
-        //                 if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {
-        //                     echo "Warning: Security scan found vulnerabilities. Please address them."
-        //                 }
-        //                 // if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {       //test aşamasında gerek yok
-        //                 //     error("Security scan failed. Please fix vulnerabilities.")
-        //                 // }
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Run Security Scans') {
+            steps {
+                sh '''
+                curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/scripts/install.sh | sh
+                trivy fs --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE} 
+                '''
+                // trivy fs --exit-code 1 --severity HIGH,CRITICAL . > ${WORKSPACE}/${TEST_RESULT_FILE}   (pipeline risk varsa durur.)
+            }
+        }
+        stage('Check Security Scan Results') {
+            steps {
+                script {
+                    if (fileExists(env.TEST_RESULT_FILE)) {
+                        def scanResults = readFile(env.TEST_RESULT_FILE)
+                        if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {
+                            echo "Warning: Security scan found vulnerabilities. Please address them."
+                        }
+                        // if (scanResults.contains("CRITICAL") || scanResults.contains("HIGH")) {       //test aşamasında gerek yok
+                        //     error("Security scan failed. Please fix vulnerabilities.")
+                        // }
+                    }
+                }
+            }
+        }
         stage('Apply Terraform (Backend Resources)') {
             steps {
                 dir("${BACKEND_S3_DIR}") {
@@ -141,8 +141,6 @@ pipeline {
                     
                     # Node Exporter yükle
                     helm install node-exporter prometheus-community/prometheus-node-exporter --namespace kube-system
-
-                    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
                     '''
                 }
             }
@@ -218,17 +216,17 @@ pipeline {
                 '''
             }
         }
-        // stage('Run Security Scans on Docker Images') {
-        //     steps {
-        //         sh '''
-        //         # Scan the frontend and backend Docker images for vulnerabilities and save the results
-        //         trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --timeout 10m --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
-        //         trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
-        //         '''
-        //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest      // (pipeline risk varsa durur. bu aşamada yapmadım)
-        //         // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest       //  (pipeline risk varsa durur. bu aşamada yapmadım)
-        //     }
-        // }
+        stage('Run Security Scans on Docker Images') {
+            steps {
+                sh '''
+                # Scan the frontend and backend Docker images for vulnerabilities and save the results
+                trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --timeout 10m --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest
+                trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest
+                '''
+                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-frontend:latest      // (pipeline risk varsa durur. bu aşamada yapmadım)
+                // trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress --output ${IMAGE_TEST_RESULT_FILE} mecit35/mern-project-backend:latest       //  (pipeline risk varsa durur. bu aşamada yapmadım)
+            }
+        }
         stage('Push Docker Images') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -240,8 +238,6 @@ pipeline {
                 }
             }
         }
-
-
 
         stage('EKS Deploy') {
             steps {

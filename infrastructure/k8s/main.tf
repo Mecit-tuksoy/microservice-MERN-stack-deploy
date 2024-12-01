@@ -48,24 +48,6 @@ resource "aws_security_group" "eks_cluster_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port       = 30001
-    to_port         = 30001
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-    ingress {
-    from_port       = 30002
-    to_port         = 30002
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-    ingress {
-    from_port       = 9100
-    to_port         = 9100
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   egress {
     from_port   = 0
@@ -91,24 +73,6 @@ resource "aws_security_group" "eks_node_sg" {
     security_groups = [aws_security_group.eks_cluster_sg.id]
   }
 
-  ingress {
-    from_port       = 30001
-    to_port         = 30001
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-    ingress {
-    from_port       = 30002
-    to_port         = 30002
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-    ingress {
-    from_port       = 9100
-    to_port         = 9100
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   ingress {
   from_port   = 443
