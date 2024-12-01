@@ -1,4 +1,4 @@
-NOT: README-image.rar klasöründe README.md ve Ekran görüntüleri var!!!
+NOT: README-image klasöründe README.md ve Ekran görüntüleri var!!!
 
 # Terraform ile altyapının oluşturulması:
 
