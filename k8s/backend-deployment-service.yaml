@@ -24,11 +24,11 @@ spec:
           
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
+              cpu: "300m"        #(1 CPU = 1000 millicores)
               memory: "512Mi"
+            limits:
+              cpu: "750m"
+              memory: "1024Mi"
           
       restartPolicy: Always
 
