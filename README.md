@@ -3,7 +3,7 @@
 
 # Terraform ile altyapinin oluşturulmasi:
 
-Terraform main.tf dosyasi *infrastructure* dosyasindadir.
+Terraform main.tf dosyasi *infrastructure* klasöründedir.
 
 ## Bu terraform yapisina göre:
 
