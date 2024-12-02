@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        PYTHON_PATH = "/usr/bin/python3"
+        ETL_SCRIPT_PATH = "/mnt/c/Users/MCT/Desktop/2N_TECH/2n DevOps CASE FİNALLY-çalışma/mern-project-k8s'li github repo/microservice-MERN-stack-deploy/python-project/ETL.py"
+        CRON_LOG_PATH = "/mnt/c/Users/MCT/Desktop/2N_TECH/2n DevOps CASE FİNALLY-çalışma/mern-project-k8s'li github repo/microservice-MERN-stack-deploy/python-project/cron.log"
+        CRON_LOG_OUTPUT_FILE = "/mnt/c/Users/MCT/Desktop/2N_TECH/2n DevOps CASE FİNALLY-çalışma/mern-project-k8s'li github repo/microservice-MERN-stack-deploy/python-project/cron_output.txt"
+    }
+
+    stages {
+        stage('Python Environment Check') {
+            steps {
+                script {
+                    def pythonVersion = sh(script: "which ${env.PYTHON_PATH}", returnStdout: true).trim()
+                    if (!pythonVersion) {
+                        error "Python3 not found at ${env.PYTHON_PATH}. Please install Python3."
+                    }
+                    echo "Python3 found at ${pythonVersion}"
+                }
+            }
+        }
+
+
+
+        stage('Run ETL.py') {
+            steps {
+                script {
+                    // Python komutunu çift tırnaklarla sararak çalıştırıyoruz
+                    sh "\"${env.PYTHON_PATH}\" \"${env.ETL_SCRIPT_PATH}\" >> \"${env.CRON_LOG_PATH}\""
+                    echo "ETL.py executed successfully."
+                }
+            }
+        }
+
+        stage('Setup Cron Job') {
+            steps {
+                script {
+                    // Cron job'ını geçici bir dosyaya yaz
+                    def cronJob = "1 * * * * ${env.PYTHON_PATH} \"${env.ETL_SCRIPT_PATH}\" >> \"${env.CRON_LOG_PATH}\" 2>&1\n" 
+                    echo "Cron Job: ${cronJob}"
+
+                    // Cron job'ını geçici bir dosyaya yaz
+                    writeFile(file: '/tmp/mycron', text: cronJob)
+                    
+                    // Crontab dosyasını yükle
+                    sh "crontab /tmp/mycron"
+                    echo "Cron job has been configured."
+                }
+            }
+        }
+
+
+        stage('Verify Cron Job Output') {
+            steps {
+                script {
+                    echo "Waiting for cron job to run..."
+                    sh "sleep 3660"  // cron job 1 saatte bir çalışacağı için 1 saat 1 dk bekliyor. Gerekirse bu adım kaldırılabilir.
+
+                    def logExists = fileExists(env.CRON_LOG_PATH)
+                    if (!logExists) {
+                        error "Cron log file does not exist at ${env.CRON_LOG_PATH}"
+                    }
+                    echo "Cron log exists. Checking recent entries..."
+                    
+                    sh "tail -n 1 \"${env.CRON_LOG_PATH}\" > \"${env.CRON_LOG_OUTPUT_FILE}\""
+                    
+                    sh "wc -l < \"${env.CRON_LOG_PATH}\""
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            emailext attachLog: true,
+            subject: "'${currentBuild.result}'",
+            body: "Project: ${env.JOB_NAME}<br/>" +
+                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                "URL: ${env.BUILD_URL}<br/>",
+            to: 'mecit.tuksoy@gmail.com',
+            attachmentsPattern: "${CRON_LOG_OUTPUT_FILE}"
+        }
+    }
+}
