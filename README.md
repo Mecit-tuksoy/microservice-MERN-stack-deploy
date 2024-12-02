@@ -11,7 +11,7 @@ Terraform main.tf dosyasi *infrastructure* klasöründedir.
 
  2- EKS default VPC'de oluşturulmuştur.
 
- 3- Security Group'lari cluster içinde master node ve worker nodelarin birbiri ile iletişim kurabilecekleri şekilde yapilandirdim. Eks oluştuktan sonra manual olarak kubernetes service objesinde belirttiğim 30001, 30002 ve 9100 portlarini sonradan cnsol üzerinden ekkledim.
+ 3- Security Group'lari cluster içinde master node ve worker nodelarin birbiri ile iletişim kurabilecekleri şekilde yapilandirdim. Eks oluştuktan sonra manual olarak kubernetes service objesinde belirttiğim 30001, 30002 ve 9100 portlarini sonradan consol üzerinden ekledim.
 
  4- EKS'nin oluşabilmesi ve benim yapim için gerekli olan izinleri verdiğim rolleri oluşturdum.
 
